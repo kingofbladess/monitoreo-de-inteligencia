@@ -1,0 +1,2276 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso Seguro — Monitoreo de Inteligencia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent: #10e89a;
+      --accent-rgb: 16, 232, 154;
+      --accent-2: #38bdf8;
+      --accent-2-rgb: 56, 189, 248;
+      --warn: #fbbf24;
+      --bg-page: #05080f;
+      --bg-stage: #070c15;
+      --bg-panel: #0a101b;
+      --bg-card: rgba(13, 20, 33, 0.82);
+      --bg-input: rgba(6, 10, 18, 0.9);
+      --border: rgba(148, 163, 184, 0.14);
+      --border-strong: rgba(148, 163, 184, 0.26);
+      --text-main: #f1f5f9;
+      --text-soft: #94a3b8;
+      --text-dim: #64748b;
+      --radius-lg: 20px;
+      --radius-md: 12px;
+    }
+
+    body.state-success {
+      --accent: #f5c542;
+      --accent-rgb: 245, 197, 66;
+      --accent-2: #fde078;
+      --accent-2-rgb: 253, 224, 120;
+      --bg-page: #0c0904;
+      --bg-stage: #140f06;
+      --bg-panel: #151007;
+    }
+
+    body.state-error {
+      --accent: #f43f5e;
+      --accent-rgb: 244, 63, 94;
+      --accent-2: #fb7185;
+      --accent-2-rgb: 251, 113, 133;
+      --bg-page: #10060a;
+      --bg-stage: #17080e;
+      --bg-panel: #18080e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100dvh;
+      background: var(--bg-page);
+      color: var(--text-main);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      transition: background-color 0.55s ease;
+    }
+
+    /* ============================================================
+       SPLIT LAYOUT (LEFT: PURE 3D ANIMATION | RIGHT: CLEAN LOGIN)
+    ============================================================ */
+    .split-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(420px, 0.8fr);
+      min-height: 100dvh;
+      width: 100%;
+    }
+
+    /* ---------------- LEFT VISUAL STAGE ---------------- */
+    .visual-stage {
+      position: relative;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(var(--accent-rgb), 0.13) 0%, transparent 56%),
+        radial-gradient(circle at 76% 78%, rgba(var(--accent-2-rgb), 0.08) 0%, transparent 50%),
+        linear-gradient(145deg, var(--bg-stage) 0%, #04070d 100%);
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+      isolation: isolate;
+      cursor: grab;
+      user-select: none;
+      transition: background 0.6s ease, border-color 0.45s ease;
+    }
+
+    .visual-stage.dragging {
+      cursor: grabbing;
+    }
+
+    body.state-error .visual-stage {
+      border-right-color: rgba(244, 63, 94, 0.3);
+    }
+
+    .visual-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: radial-gradient(circle at 50% 50%, black 28%, transparent 88%);
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, black 28%, transparent 88%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #core-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: block;
+      touch-action: none;
+    }
+
+    /* Only visible UI element on the left stage */
+    .brand-mark {
+      position: absolute;
+      top: 30px;
+      left: 36px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: none;
+      padding: 8px 14px 8px 8px;
+      border-radius: 14px;
+      background: rgba(6, 10, 18, 0.45);
+      backdrop-filter: blur(8px);
+    }
+
+    .brand-emblem {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.22), rgba(var(--accent-2-rgb), 0.12));
+      border: 1px solid rgba(var(--accent-rgb), 0.42);
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      box-shadow: 0 0 22px rgba(var(--accent-rgb), 0.24);
+      transition: all 0.4s ease;
+    }
+
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text-main);
+      text-transform: uppercase;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+    }
+
+    /* ---------------- RIGHT LOGIN PANEL ---------------- */
+    .auth-panel {
+      position: relative;
+      background:
+        radial-gradient(circle at 85% 15%, rgba(var(--accent-rgb), 0.07) 0%, transparent 45%),
+        var(--bg-panel);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 36px;
+      transition: background 0.55s ease;
+    }
+
+    .auth-main {
+      width: 100%;
+      max-width: 404px;
+    }
+
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px 28px;
+      backdrop-filter: blur(18px);
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.52),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    body.state-success .auth-card {
+      position: relative;
+      overflow: hidden;
+      border-color: rgba(245, 197, 66, 0.48);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.54), 0 0 56px rgba(245, 197, 66, 0.24);
+    }
+
+    body.state-success .auth-card::after {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: linear-gradient(
+        112deg,
+        transparent 38%,
+        rgba(255, 245, 195, 0.24) 49%,
+        rgba(245, 197, 66, 0.12) 54%,
+        transparent 64%
+      );
+      transform: translateX(-120%);
+      animation: goldCardSheen 1.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      pointer-events: none;
+    }
+
+    @keyframes goldCardSheen {
+      0% { transform: translateX(-115%); opacity: 0.9; }
+      100% { transform: translateX(125%); opacity: 0; }
+    }
+
+    /* Fullscreen Solar Flash Overlay on Login Success */
+    .sun-flash-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 35;
+      pointer-events: none;
+      opacity: 0;
+      background:
+        radial-gradient(circle at 30% 50%, rgba(255, 250, 220, 0.92) 0%, rgba(245, 197, 66, 0.46) 28%, rgba(217, 119, 6, 0.12) 58%, transparent 78%);
+    }
+
+    .sun-flash-overlay.flash-active {
+      animation: solarBloomFlash 1.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes solarBloomFlash {
+      0% { opacity: 0; transform: scale(0.86); }
+      14% { opacity: 0.78; transform: scale(1.03); }
+      45% { opacity: 0.32; transform: scale(1.08); }
+      100% { opacity: 0; transform: scale(1.14); }
+    }
+
+    body.state-error .auth-card {
+      border-color: rgba(244, 63, 94, 0.45);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 42px rgba(244, 63, 94, 0.18);
+    }
+
+    .auth-card.shake {
+      animation: cardShake 0.44s cubic-bezier(.36, .07, .19, .97) both;
+    }
+
+    @keyframes cardShake {
+      10%, 90% { transform: translate3d(-3px, 0, 0); }
+      20%, 80% { transform: translate3d(5px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+      40%, 60% { transform: translate3d(6px, 0, 0); }
+    }
+
+    .auth-header {
+      margin-bottom: 24px;
+    }
+
+    .security-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: rgba(var(--accent-rgb), 0.1);
+      border: 1px solid rgba(var(--accent-rgb), 0.28);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .auth-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+      font-size: 13.5px;
+      color: var(--text-soft);
+      line-height: 1.5;
+    }
+
+    /* Form Controls */
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+
+    .field-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    .caps-hint {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--warn);
+      display: none;
+    }
+
+    .caps-hint.visible {
+      display: inline-block;
+    }
+
+    .input-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      width: 17px;
+      height: 17px;
+      color: var(--text-dim);
+      pointer-events: none;
+      transition: color 0.2s ease;
+    }
+
+    .text-input {
+      width: 100%;
+      height: 46px;
+      padding: 0 42px 0 42px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .text-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .text-input:hover {
+      border-color: var(--border-strong);
+    }
+
+    .text-input:focus {
+      border-color: rgba(var(--accent-rgb), 0.78);
+      background: rgba(8, 14, 24, 0.96);
+      box-shadow: 0 0 0 3.5px rgba(var(--accent-rgb), 0.14);
+    }
+
+    .text-input[aria-invalid="true"] {
+      border-color: rgba(244, 63, 94, 0.75);
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.14);
+    }
+
+    .input-box:focus-within .input-icon {
+      color: var(--accent);
+    }
+
+    .field-error {
+      display: none;
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: #fda4af;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .field-error.visible {
+      display: block;
+    }
+
+    .toggle-pass {
+      position: absolute;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .toggle-pass:hover,
+    .toggle-pass:focus-visible {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+      outline: none;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 4px 0 22px;
+      font-size: 13px;
+    }
+
+    .remember-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-soft);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .remember-check input {
+      accent-color: var(--accent);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .text-link {
+      background: none;
+      border: none;
+      color: var(--text-soft);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .text-link:hover,
+    .text-link:focus-visible {
+      color: var(--accent);
+      outline: none;
+      text-decoration: underline;
+    }
+
+    .btn-primary {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent) 0%, #0ec986 100%);
+      color: #03130d;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      box-shadow: 0 10px 26px rgba(var(--accent-rgb), 0.28);
+      transition: transform 0.16s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+      box-shadow: 0 14px 32px rgba(var(--accent-rgb), 0.38);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.52;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    body.state-success .btn-primary {
+      background: linear-gradient(135deg, #f7d060 0%, #d99b1e 100%);
+      color: #1a1102;
+    }
+
+    body.state-error .btn-primary {
+      background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+      color: #ffffff;
+    }
+
+    .btn-ghost {
+      width: 100%;
+      height: 44px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-main);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      border-color: rgba(var(--accent-rgb), 0.55);
+      background: rgba(var(--accent-rgb), 0.08);
+      color: var(--accent);
+    }
+
+    /* Views */
+    .panel-view {
+      display: none;
+      animation: viewIn 0.28s ease forwards;
+    }
+
+    .panel-view.active {
+      display: block;
+    }
+
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* OTP View */
+    .otp-demo-hint {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: rgba(var(--accent-2-rgb), 0.09);
+      border: 1px solid rgba(var(--accent-2-rgb), 0.28);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #bae6fd;
+      margin-bottom: 16px;
+    }
+
+    .otp-demo-hint strong {
+      color: #ffffff;
+      letter-spacing: 0.14em;
+    }
+
+    .otp-autofill-btn {
+      background: rgba(var(--accent-2-rgb), 0.18);
+      border: 1px solid rgba(var(--accent-2-rgb), 0.42);
+      color: #e0f2fe;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .otp-input {
+      width: 100%;
+      height: 52px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.42em;
+      padding: 0 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-input);
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .otp-input:focus {
+      border-color: rgba(var(--accent-rgb), 0.85);
+      box-shadow: 0 0 0 3.5px rgba(var(--accent-rgb), 0.16);
+    }
+
+    .otp-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0 18px;
+      font-size: 12px;
+    }
+
+    /* Loading View */
+    .loading-box {
+      text-align: center;
+      padding: 18px 4px 10px;
+    }
+
+    .spinner-orbit {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      border: 2.5px solid rgba(var(--accent-rgb), 0.16);
+      border-top-color: var(--accent);
+      border-right-color: var(--accent-2);
+      display: grid;
+      place-items: center;
+      animation: spin 0.9s linear infinite;
+      box-shadow: 0 0 28px rgba(var(--accent-rgb), 0.24);
+    }
+
+    .spinner-orbit svg {
+      animation: spinReverse 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spinReverse { to { transform: rotate(-360deg); } }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+      margin-top: 18px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-2), var(--accent));
+      transition: width 0.16s ease;
+    }
+
+    /* Result Views */
+    .result-box {
+      text-align: center;
+      padding: 6px 0;
+    }
+
+    .status-icon-wrap {
+      width: 62px;
+      height: 62px;
+      border-radius: 17px;
+      margin: 0 auto 16px;
+      display: grid;
+      place-items: center;
+      background: rgba(var(--accent-rgb), 0.14);
+      border: 1px solid rgba(var(--accent-rgb), 0.42);
+      color: var(--accent);
+      box-shadow: 0 0 32px rgba(var(--accent-rgb), 0.24);
+    }
+
+    .result-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .result-desc {
+      font-size: 13.5px;
+      color: var(--text-soft);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .btn-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    /* Subtle Demo Triggers */
+    .demo-strip {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .demo-btn {
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .demo-btn.ok {
+      background: rgba(16, 232, 154, 0.09);
+      border-color: rgba(16, 232, 154, 0.28);
+      color: #34d399;
+    }
+
+    .demo-btn.ok:hover {
+      background: rgba(16, 232, 154, 0.18);
+    }
+
+    .demo-btn.fail {
+      background: rgba(244, 63, 94, 0.09);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+    }
+
+    .demo-btn.fail:hover {
+      background: rgba(244, 63, 94, 0.18);
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: rgba(3, 6, 12, 0.82);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+      animation: viewIn 0.2s ease;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 420px;
+      max-height: calc(100dvh - 40px);
+      overflow-y: auto;
+      background: #0d1523;
+      border: 1px solid rgba(var(--accent-rgb), 0.35);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.72);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .modal-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-soft);
+      cursor: pointer;
+      font-size: 15px;
+      display: grid;
+      place-items: center;
+    }
+
+    .modal-close:hover,
+    .modal-close:focus-visible {
+      color: var(--accent);
+      border-color: rgba(var(--accent-rgb), 0.5);
+      outline: none;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 22px;
+      z-index: 50;
+      background: #0f172a;
+      border: 1px solid rgba(var(--accent-rgb), 0.5);
+      color: var(--text-main);
+      padding: 11px 16px;
+      border-radius: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .split-shell {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .visual-stage {
+        min-height: 360px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .brand-mark {
+        top: 20px;
+        left: 20px;
+      }
+      .auth-panel {
+        padding: 28px 20px 34px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .visual-stage {
+        min-height: 300px;
+      }
+      .auth-card {
+        padding: 24px 20px;
+      }
+      .demo-strip {
+        grid-template-columns: 1fr;
+      }
+      .toast {
+        left: 16px;
+        right: 16px;
+        bottom: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sun-flash-overlay" id="sun-flash-overlay" aria-hidden="true"></div>
+  <div class="split-shell">
+    <!-- ============================================================
+         LEFT SIDE: PURE INTERACTIVE 3D ANIMATION + BRAND TITLE ONLY
+    ============================================================ -->
+    <aside class="visual-stage" id="visual-stage" aria-label="Animación 3D interactiva de Monitoreo de Inteligencia">
+      <canvas id="core-canvas"></canvas>
+
+      <div class="brand-mark">
+        <div class="brand-emblem" aria-hidden="true">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L3 7v6c0 5.5 3.8 10.4 9 12 5.2-1.6 9-6.5 9-12V7l-9-5z"/>
+            <circle cx="12" cy="11.5" r="2.6"/>
+          </svg>
+        </div>
+        <span class="brand-name">Monitoreo de Inteligencia</span>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         RIGHT SIDE: CLEAN MINIMALIST LOGIN
+    ============================================================ -->
+    <main class="auth-panel">
+      <section class="auth-main" aria-label="Inicio de sesión">
+        <div class="auth-card" id="auth-card">
+
+          <!-- VIEW 1: LOGIN FORM -->
+          <div class="panel-view active" id="view-login">
+            <div class="auth-header">
+              <div class="security-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span>Acceso Seguro</span>
+              </div>
+              <h1 class="auth-title">Iniciar sesión</h1>
+              <p class="auth-subtitle">Ingresa tus credenciales para acceder al sistema.</p>
+            </div>
+
+            <form id="login-form" novalidate>
+              <div class="field">
+                <div class="field-header">
+                  <label class="field-label" for="input-user">Usuario</label>
+                </div>
+                <div class="input-box">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  <input
+                    type="text"
+                    id="input-user"
+                    class="text-input"
+                    placeholder="Nombre de usuario"
+                    autocomplete="username"
+                    aria-describedby="err-user"
+                    aria-invalid="false"
+                    required
+                  />
+                </div>
+                <p class="field-error" id="err-user" role="alert"></p>
+              </div>
+
+              <div class="field">
+                <div class="field-header">
+                  <label class="field-label" for="input-pass">Contraseña</label>
+                  <span class="caps-hint" id="caps-hint" role="status">BLOQ MAYÚS</span>
+                </div>
+                <div class="input-box">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <input
+                    type="password"
+                    id="input-pass"
+                    class="text-input"
+                    placeholder="••••••••••••"
+                    autocomplete="current-password"
+                    aria-describedby="err-pass"
+                    aria-invalid="false"
+                    required
+                  />
+                  <button type="button" class="toggle-pass" id="btn-toggle-pass" aria-label="Mostrar contraseña" aria-pressed="false">
+                    <svg id="eye-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
+                </div>
+                <p class="field-error" id="err-pass" role="alert"></p>
+              </div>
+
+              <div class="form-row">
+                <label class="remember-check">
+                  <input type="checkbox" id="chk-remember" checked />
+                  <span>Recordarme</span>
+                </label>
+                <button type="button" class="text-link" id="btn-forgot">¿Olvidaste tu contraseña?</button>
+              </div>
+
+              <button type="submit" class="btn-primary" id="btn-submit">
+                <span>Acceder</span>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </button>
+            </form>
+          </div>
+
+          <!-- VIEW 2: AUTHENTICATING -->
+          <div class="panel-view" id="view-loading" aria-live="polite">
+            <div class="loading-box">
+              <div class="spinner-orbit" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <h2 class="result-title">Verificando...</h2>
+              <p class="result-desc" id="loading-step-text">Validando credenciales de acceso</p>
+              <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
+                <div class="progress-fill" id="auth-progress"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW 3: 2FA OTP -->
+          <div class="panel-view" id="view-otp" aria-live="polite">
+            <div class="auth-header">
+              <div class="security-badge">Verificación 2FA</div>
+              <h2 class="auth-title">Código de seguridad</h2>
+              <p class="auth-subtitle">Ingresa el código de 6 dígitos para <strong id="otp-user-label">admin</strong>.</p>
+            </div>
+
+            <div class="otp-demo-hint">
+              <span>DEMO OTP: <strong id="otp-demo-code">482910</strong></span>
+              <button type="button" class="otp-autofill-btn" id="btn-otp-fill">Autocompletar</button>
+            </div>
+
+            <form id="otp-form" novalidate>
+              <div class="field">
+                <label class="field-label" for="input-otp" style="display:block;margin-bottom:7px;">Código OTP</label>
+                <input
+                  type="text"
+                  id="input-otp"
+                  class="otp-input"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  maxlength="6"
+                  placeholder="000000"
+                  aria-describedby="err-otp"
+                  aria-invalid="false"
+                  required
+                />
+                <p class="field-error" id="err-otp" role="alert"></p>
+              </div>
+
+              <div class="otp-actions">
+                <button type="button" class="text-link" id="btn-otp-resend">Reenviar código</button>
+                <button type="button" class="text-link" id="btn-otp-cancel">Volver</button>
+              </div>
+
+              <button type="submit" class="btn-primary">Verificar y entrar</button>
+            </form>
+          </div>
+
+          <!-- VIEW 4: SUCCESS -->
+          <div class="panel-view" id="view-success" aria-live="polite">
+            <div class="result-box">
+              <div class="status-icon-wrap" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="security-badge">Acceso concedido</div>
+              <h2 class="result-title">Bienvenido, <span id="meta-user">Admin</span></h2>
+              <p class="result-desc">Tu sesión ha sido verificada correctamente.</p>
+              <div class="btn-stack">
+                <button type="button" class="btn-primary" id="btn-logout">Cerrar sesión</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW 5: ERROR -->
+          <div class="panel-view" id="view-error" role="alert" aria-live="assertive">
+            <div class="result-box">
+              <div class="status-icon-wrap" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="15" y1="9" x2="9" y2="15"/>
+                  <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+              </div>
+              <div class="security-badge">Acceso denegado</div>
+              <h2 class="result-title">Credenciales inválidas</h2>
+              <p class="result-desc" id="error-detail-msg">Verifica tu usuario y contraseña e inténtalo de nuevo.</p>
+              <div class="btn-stack">
+                <button type="button" class="btn-primary" id="btn-retry">Reintentar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compact Demo Triggers -->
+        <div class="demo-strip" aria-label="Pruebas rápidas en modo demo">
+          <button type="button" class="demo-btn ok" id="btn-demo-ok">✓ Demo acceso</button>
+          <button type="button" class="demo-btn fail" id="btn-demo-fail">✕ Demo error</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Password Recovery Modal -->
+  <div class="modal-backdrop" id="modal-recovery" role="dialog" aria-modal="true" aria-labelledby="recovery-title" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 class="modal-title" id="recovery-title">Recuperar acceso</h3>
+        <button type="button" class="modal-close" data-close-modal="modal-recovery" aria-label="Cerrar ventana">✕</button>
+      </div>
+      <p style="font-size:13.5px;color:var(--text-soft);line-height:1.5;margin-bottom:16px;">
+        Ingresa tu correo corporativo o usuario para recibir un enlace de recuperación.
+      </p>
+      <form id="recovery-form" novalidate>
+        <div class="field">
+          <label class="field-label" for="input-recovery-email" style="display:block;margin-bottom:7px;">Correo o usuario</label>
+          <input type="text" id="input-recovery-email" class="text-input" style="padding-left:14px;" placeholder="operador@monitoreo.com" aria-describedby="err-recovery" required />
+          <p class="field-error" id="err-recovery" role="alert"></p>
+        </div>
+        <button type="submit" class="btn-primary">Enviar solicitud</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ==========================================================
+      // 1. STATE & DEMO ACCOUNTS
+      // ==========================================================
+      const DEMO_ACCOUNTS = {
+        admin: ['Monitor2026!', 'Cyber2026!'],
+        operador: ['Seguro2026!']
+      };
+
+      const state = {
+        mode: 'normal', // 'normal' | 'loading' | 'otp' | 'success' | 'error'
+        authInFlight: false,
+        authTimer: null,
+        failedAttempts: 0,
+        lockoutRemaining: 0,
+        lockoutTimer: null,
+        pendingUser: '',
+        activeOtp: '',
+        otpAttempts: 0,
+        otpResendCooldown: 0,
+        otpCooldownTimer: null,
+        typingBoost: 0,
+        shockwave: 0,
+        errorPulse: 0,
+        sunFlash: 0
+      };
+
+      // ==========================================================
+      // 2. DOM REFERENCES
+      // ==========================================================
+      const body = document.body;
+      const authCard = document.getElementById('auth-card');
+      const views = {
+        login: document.getElementById('view-login'),
+        loading: document.getElementById('view-loading'),
+        otp: document.getElementById('view-otp'),
+        success: document.getElementById('view-success'),
+        error: document.getElementById('view-error')
+      };
+
+      const loginForm = document.getElementById('login-form');
+      const inputUser = document.getElementById('input-user');
+      const inputPass = document.getElementById('input-pass');
+      const errUser = document.getElementById('err-user');
+      const errPass = document.getElementById('err-pass');
+      const capsHint = document.getElementById('caps-hint');
+      const chkRemember = document.getElementById('chk-remember');
+      const btnTogglePass = document.getElementById('btn-toggle-pass');
+      const eyeIcon = document.getElementById('eye-icon');
+      const btnSubmit = document.getElementById('btn-submit');
+      const btnForgot = document.getElementById('btn-forgot');
+
+      const otpForm = document.getElementById('otp-form');
+      const inputOtp = document.getElementById('input-otp');
+      const errOtp = document.getElementById('err-otp');
+      const otpUserLabel = document.getElementById('otp-user-label');
+      const otpDemoCode = document.getElementById('otp-demo-code');
+      const btnOtpFill = document.getElementById('btn-otp-fill');
+      const btnOtpResend = document.getElementById('btn-otp-resend');
+      const btnOtpCancel = document.getElementById('btn-otp-cancel');
+
+      const btnDemoOk = document.getElementById('btn-demo-ok');
+      const btnDemoFail = document.getElementById('btn-demo-fail');
+      const btnRetry = document.getElementById('btn-retry');
+      const btnLogout = document.getElementById('btn-logout');
+
+      const loadingStepText = document.getElementById('loading-step-text');
+      const authProgress = document.getElementById('auth-progress');
+      const progressBar = document.getElementById('progress-bar');
+      const metaUser = document.getElementById('meta-user');
+      const errorDetailMsg = document.getElementById('error-detail-msg');
+
+      const modalRecovery = document.getElementById('modal-recovery');
+      const recoveryForm = document.getElementById('recovery-form');
+      const inputRecoveryEmail = document.getElementById('input-recovery-email');
+      const errRecovery = document.getElementById('err-recovery');
+
+      const toastEl = document.getElementById('toast');
+      const sunFlashOverlay = document.getElementById('sun-flash-overlay');
+      let toastTimer = null;
+
+      // ==========================================================
+      // 3. UI HELPERS
+      // ==========================================================
+      function showToast(message) {
+        toastEl.textContent = message;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+      }
+
+      function setFieldError(inputEl, errorEl, message) {
+        if (message) {
+          inputEl.setAttribute('aria-invalid', 'true');
+          errorEl.textContent = message;
+          errorEl.classList.add('visible');
+        } else {
+          inputEl.setAttribute('aria-invalid', 'false');
+          errorEl.textContent = '';
+          errorEl.classList.remove('visible');
+        }
+      }
+
+      function switchView(name) {
+        Object.values(views).forEach((v) => v.classList.remove('active'));
+        views[name].classList.add('active');
+      }
+
+      function setThemeState(mode) {
+        state.mode = mode;
+        body.classList.remove('state-success', 'state-error');
+        if (mode === 'success') body.classList.add('state-success');
+        else if (mode === 'error') body.classList.add('state-error');
+        requestStaticRedraw();
+      }
+
+      try {
+        const savedUser = localStorage.getItem('monitor_login_user');
+        if (savedUser) inputUser.value = savedUser;
+      } catch (e) {}
+
+      // ==========================================================
+      // 4. ACCESSIBLE MODAL (ESC + FOCUS TRAP + RESTORE)
+      // ==========================================================
+      let activeModal = null;
+      let lastTriggerEl = null;
+
+      function getFocusable(container) {
+        return Array.from(
+          container.querySelectorAll('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')
+        );
+      }
+
+      function openModal(modalEl, triggerEl) {
+        activeModal = modalEl;
+        lastTriggerEl = triggerEl || document.activeElement;
+        modalEl.classList.add('open');
+        modalEl.setAttribute('aria-hidden', 'false');
+        const focusables = getFocusable(modalEl);
+        if (focusables.length) focusables[0].focus();
+      }
+
+      function closeModal(modalEl) {
+        if (!modalEl) return;
+        modalEl.classList.remove('open');
+        modalEl.setAttribute('aria-hidden', 'true');
+        if (activeModal === modalEl) activeModal = null;
+        if (lastTriggerEl && typeof lastTriggerEl.focus === 'function') {
+          lastTriggerEl.focus();
+          lastTriggerEl = null;
+        }
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (!activeModal) return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeModal(activeModal);
+          return;
+        }
+        if (e.key === 'Tab') {
+          const focusables = getFocusable(activeModal);
+          if (!focusables.length) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      });
+
+      document.querySelectorAll('[data-close-modal]').forEach((btn) => {
+        btn.addEventListener('click', () => closeModal(document.getElementById(btn.getAttribute('data-close-modal'))));
+      });
+      modalRecovery.addEventListener('click', (e) => {
+        if (e.target === modalRecovery) closeModal(modalRecovery);
+      });
+
+      // ==========================================================
+      // 5. AUTHENTICATION, 2FA OTP & LOCKOUT SYNC
+      // ==========================================================
+      function triggerShake() {
+        authCard.classList.remove('shake');
+        void authCard.offsetWidth;
+        authCard.classList.add('shake');
+      }
+
+      function cancelInFlightAuth() {
+        clearInterval(state.authTimer);
+        state.authTimer = null;
+        state.authInFlight = false;
+        btnSubmit.disabled = false;
+      }
+
+      function clearLockoutState(resetAttempts) {
+        clearInterval(state.lockoutTimer);
+        state.lockoutTimer = null;
+        state.lockoutRemaining = 0;
+        if (resetAttempts) state.failedAttempts = 0;
+        btnRetry.disabled = false;
+        btnRetry.textContent = 'Reintentar';
+      }
+
+      function generateOtp() {
+        return String(Math.floor(100000 + Math.random() * 900000));
+      }
+
+      function startOtpCooldown(seconds) {
+        clearInterval(state.otpCooldownTimer);
+        state.otpResendCooldown = seconds;
+        btnOtpResend.disabled = true;
+        btnOtpResend.textContent = `Reenviar (${seconds}s)`;
+
+        state.otpCooldownTimer = setInterval(() => {
+          state.otpResendCooldown -= 1;
+          if (state.otpResendCooldown <= 0) {
+            clearInterval(state.otpCooldownTimer);
+            btnOtpResend.disabled = false;
+            btnOtpResend.textContent = 'Reenviar código';
+          } else {
+            btnOtpResend.textContent = `Reenviar (${state.otpResendCooldown}s)`;
+          }
+        }, 1000);
+      }
+
+      function enterOtpStep(username) {
+        state.pendingUser = username;
+        state.otpAttempts = 0;
+        state.activeOtp = generateOtp();
+        otpUserLabel.textContent = username;
+        otpDemoCode.textContent = state.activeOtp;
+        inputOtp.value = '';
+        setFieldError(inputOtp, errOtp, '');
+        setThemeState('otp');
+        switchView('otp');
+        startOtpCooldown(15);
+        inputOtp.focus();
+      }
+
+      function runAuthentication(username, password) {
+        if (state.authInFlight) return;
+        if (state.lockoutRemaining > 0) {
+          showToast(`Bloqueo temporal (${state.lockoutRemaining}s).`);
+          return;
+        }
+
+        const cleanUser = username.trim();
+        setFieldError(inputUser, errUser, '');
+        setFieldError(inputPass, errPass, '');
+
+        let firstInvalid = null;
+        if (!cleanUser) {
+          setFieldError(inputUser, errUser, 'Ingresa tu usuario.');
+          firstInvalid = inputUser;
+        }
+        if (!password) {
+          setFieldError(inputPass, errPass, 'Ingresa tu contraseña.');
+          if (!firstInvalid) firstInvalid = inputPass;
+        }
+        if (firstInvalid) {
+          triggerShake();
+          firstInvalid.focus();
+          return;
+        }
+
+        state.authInFlight = true;
+        btnSubmit.disabled = true;
+        setThemeState('loading');
+        switchView('loading');
+        authProgress.style.width = '18%';
+        progressBar.setAttribute('aria-valuenow', '18');
+        loadingStepText.textContent = 'Validando credenciales...';
+
+        const steps = [
+          { pct: 55, msg: 'Verificando identidad...' },
+          { pct: 92, msg: 'Preparando verificación 2FA...' }
+        ];
+        let idx = 0;
+        clearInterval(state.authTimer);
+        state.authTimer = setInterval(() => {
+          if (idx < steps.length) {
+            authProgress.style.width = steps[idx].pct + '%';
+            progressBar.setAttribute('aria-valuenow', String(steps[idx].pct));
+            loadingStepText.textContent = steps[idx].msg;
+            idx++;
+          } else {
+            cancelInFlightAuth();
+            evaluateCredentials(cleanUser, password);
+          }
+        }, 280);
+      }
+
+      function evaluateCredentials(user, pass) {
+        const allowed = DEMO_ACCOUNTS[user.toLowerCase()];
+        const isValid = Array.isArray(allowed) && allowed.includes(pass);
+
+        if (isValid) {
+          clearLockoutState(true);
+          try {
+            if (chkRemember.checked) localStorage.setItem('monitor_login_user', user);
+            else localStorage.removeItem('monitor_login_user');
+          } catch (e) {}
+          enterOtpStep(user);
+        } else {
+          registerFailure('Contraseña');
+        }
+      }
+
+      function registerFailure(method) {
+        state.failedAttempts += 1;
+        setThemeState('error');
+        state.shockwave = 1;
+        state.errorPulse = 1;
+        switchView('error');
+        triggerShake();
+
+        if (state.failedAttempts >= 3) {
+          startLockoutCountdown(10);
+        } else {
+          errorDetailMsg.textContent = `${method} incorrecta (${state.failedAttempts}/3 intentos).`;
+          btnRetry.disabled = false;
+          btnRetry.textContent = 'Reintentar';
+        }
+      }
+
+      function startLockoutCountdown(seconds) {
+        clearInterval(state.lockoutTimer);
+        state.lockoutRemaining = seconds;
+        btnRetry.disabled = true;
+        errorDetailMsg.textContent = `Demasiados intentos fallidos. Espera ${seconds} segundos.`;
+        btnRetry.textContent = `Espera ${seconds}s...`;
+
+        state.lockoutTimer = setInterval(() => {
+          state.lockoutRemaining -= 1;
+          if (state.lockoutRemaining <= 0) {
+            clearLockoutState(true);
+            errorDetailMsg.textContent = 'Bloqueo liberado. Ya puedes intentar nuevamente.';
+          } else {
+            btnRetry.textContent = `Espera ${state.lockoutRemaining}s...`;
+          }
+        }, 1000);
+      }
+
+      function completeLoginSuccess() {
+        clearInterval(state.otpCooldownTimer);
+        setThemeState('success');
+        if (!prefersReducedMotion) {
+          state.shockwave = 1;
+          state.sunFlash = 1;
+          triggerSolarEntryBurst();
+          spawnBurstPackets(24);
+          sunFlashOverlay.classList.remove('flash-active');
+          void sunFlashOverlay.offsetWidth;
+          sunFlashOverlay.classList.add('flash-active');
+        }
+        metaUser.textContent = state.pendingUser;
+        switchView('success');
+      }
+
+      function resetToLogin(resetAttempts) {
+        cancelInFlightAuth();
+        clearInterval(state.otpCooldownTimer);
+        if (resetAttempts) clearLockoutState(true);
+        state.sunFlash = 0;
+        state.shockwave = 0;
+        solarWaves.length = 0;
+        solarSparks.length = 0;
+        sunFlashOverlay.classList.remove('flash-active');
+        setThemeState('normal');
+        switchView('login');
+        inputPass.value = '';
+        setFieldError(inputUser, errUser, '');
+        setFieldError(inputPass, errPass, '');
+        inputPass.focus();
+      }
+
+      // ==========================================================
+      // 6. FORM LISTENERS
+      // ==========================================================
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        runAuthentication(inputUser.value, inputPass.value);
+      });
+
+      const onType = () => {
+        state.typingBoost = Math.min(1, state.typingBoost + 0.36);
+      };
+      inputUser.addEventListener('input', () => { setFieldError(inputUser, errUser, ''); onType(); });
+      inputPass.addEventListener('input', () => { setFieldError(inputPass, errPass, ''); onType(); });
+      inputPass.addEventListener('keyup', (e) => {
+        capsHint.classList.toggle('visible', Boolean(e.getModifierState && e.getModifierState('CapsLock')));
+      });
+
+      btnTogglePass.addEventListener('click', () => {
+        const show = inputPass.type === 'password';
+        inputPass.type = show ? 'text' : 'password';
+        btnTogglePass.setAttribute('aria-pressed', String(show));
+        btnTogglePass.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        eyeIcon.innerHTML = show
+          ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+          : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+      });
+
+      inputOtp.addEventListener('input', () => {
+        inputOtp.value = inputOtp.value.replace(/\D/g, '').slice(0, 6);
+        setFieldError(inputOtp, errOtp, '');
+        onType();
+      });
+      btnOtpFill.addEventListener('click', () => {
+        inputOtp.value = state.activeOtp;
+        setFieldError(inputOtp, errOtp, '');
+        inputOtp.focus();
+      });
+      btnOtpResend.addEventListener('click', () => {
+        if (state.otpResendCooldown > 0) return;
+        state.activeOtp = generateOtp();
+        otpDemoCode.textContent = state.activeOtp;
+        startOtpCooldown(15);
+        showToast('Nuevo código OTP generado.');
+      });
+      btnOtpCancel.addEventListener('click', () => resetToLogin(false));
+
+      otpForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const code = inputOtp.value.trim();
+        if (!/^\d{6}$/.test(code)) {
+          setFieldError(inputOtp, errOtp, 'Ingresa los 6 dígitos.');
+          triggerShake();
+          inputOtp.focus();
+          return;
+        }
+        if (code === state.activeOtp) {
+          completeLoginSuccess();
+        } else {
+          state.otpAttempts += 1;
+          if (state.otpAttempts >= 3) {
+            clearInterval(state.otpCooldownTimer);
+            registerFailure('Código OTP');
+          } else {
+            setFieldError(inputOtp, errOtp, `Código inválido (${state.otpAttempts}/3).`);
+            triggerShake();
+          }
+        }
+      });
+
+      btnDemoOk.addEventListener('click', () => {
+        cancelInFlightAuth();
+        clearLockoutState(true);
+        inputUser.value = 'admin';
+        inputPass.value = 'Monitor2026!';
+        runAuthentication('admin', 'Monitor2026!');
+      });
+
+      btnDemoFail.addEventListener('click', () => {
+        cancelInFlightAuth();
+        clearLockoutState(false);
+        inputUser.value = 'intruso_01';
+        inputPass.value = 'clave_erronea';
+        runAuthentication('intruso_01', 'clave_erronea');
+      });
+
+      btnRetry.addEventListener('click', () => {
+        if (state.lockoutRemaining > 0) return;
+        resetToLogin(false);
+      });
+      btnLogout.addEventListener('click', () => resetToLogin(true));
+      btnForgot.addEventListener('click', () => {
+        setFieldError(inputRecoveryEmail, errRecovery, '');
+        openModal(modalRecovery, btnForgot);
+      });
+
+      recoveryForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const target = inputRecoveryEmail.value.trim();
+        if (!target) {
+          setFieldError(inputRecoveryEmail, errRecovery, 'Ingresa un correo o usuario.');
+          inputRecoveryEmail.focus();
+          return;
+        }
+        closeModal(modalRecovery);
+        inputRecoveryEmail.value = '';
+        showToast(`Enlace de recuperación enviado a ${target}`);
+      });
+
+      // ==========================================================
+      // 7. NEXT-LEVEL INTERACTIVE 3D ANIMATION ENGINE
+      //    (Drag inertia, hover magnetic arcs, click bursts, wheel zoom,
+      //     inner counter-rotating core, segmented holographic rings)
+      // ==========================================================
+      const stageEl = document.getElementById('visual-stage');
+      const canvas = document.getElementById('core-canvas');
+      const ctx = canvas.getContext('2d');
+
+      const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let prefersReducedMotion = reducedMotionQuery.matches;
+      let isPageVisible = !document.hidden;
+      let isStageInView = true;
+      let rafId = null;
+
+      let cw = 0;
+      let ch = 0;
+      let dpr = 1;
+
+      // Outer Fibonacci Geodesic Sphere
+      const OUTER_COUNT = 78;
+      const outerNodes = [];
+      const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+      for (let i = 0; i < OUTER_COUNT; i++) {
+        const y = 1 - (i / (OUTER_COUNT - 1)) * 2;
+        const r = Math.sqrt(Math.max(0, 1 - y * y));
+        const theta = goldenAngle * i;
+        outerNodes.push({
+          x: Math.cos(theta) * r,
+          y,
+          z: Math.sin(theta) * r,
+          phase: Math.random() * Math.PI * 2,
+          hub: i % 7 === 0
+        });
+      }
+
+      const outerEdges = [];
+      for (let i = 0; i < OUTER_COUNT; i++) {
+        for (let j = i + 1; j < OUTER_COUNT; j++) {
+          const dx = outerNodes[i].x - outerNodes[j].x;
+          const dy = outerNodes[i].y - outerNodes[j].y;
+          const dz = outerNodes[i].z - outerNodes[j].z;
+          if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 0.52) {
+            outerEdges.push([i, j]);
+          }
+        }
+      }
+
+      // Inner Counter-Rotating Geodesic Core (Icosahedron-like lattice)
+      const INNER_COUNT = 22;
+      const innerNodes = [];
+      for (let i = 0; i < INNER_COUNT; i++) {
+        const y = 1 - (i / (INNER_COUNT - 1)) * 2;
+        const r = Math.sqrt(Math.max(0, 1 - y * y));
+        const theta = goldenAngle * i;
+        innerNodes.push({ x: Math.cos(theta) * r, y, z: Math.sin(theta) * r });
+      }
+      const innerEdges = [];
+      for (let i = 0; i < INNER_COUNT; i++) {
+        for (let j = i + 1; j < INNER_COUNT; j++) {
+          const dx = innerNodes[i].x - innerNodes[j].x;
+          const dy = innerNodes[i].y - innerNodes[j].y;
+          const dz = innerNodes[i].z - innerNodes[j].z;
+          if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 0.96) {
+            innerEdges.push([i, j]);
+          }
+        }
+      }
+
+      // Data packets flowing along outer edges
+      const packets = Array.from({ length: 22 }, () => ({
+        edgeIdx: Math.floor(Math.random() * outerEdges.length),
+        t: Math.random(),
+        speed: 0.007 + Math.random() * 0.011,
+        boosted: false
+      }));
+
+      function spawnBurstPackets(count) {
+        for (let i = 0; i < count; i++) {
+          packets.push({
+            edgeIdx: Math.floor(Math.random() * outerEdges.length),
+            t: 0,
+            speed: 0.022 + Math.random() * 0.02,
+            boosted: true
+          });
+        }
+        if (packets.length > 52) packets.splice(22, packets.length - 52);
+      }
+
+      // 4 Segmented Holographic Orbital Rings with satellite trails
+      const orbits = [
+        { tiltX: 0.58, tiltZ: 0.24, radiusMul: 1.24, angle: 0.4, speed: 0.0085, dash: [10, 7], trail: [] },
+        { tiltX: -0.46, tiltZ: -0.55, radiusMul: 1.44, angle: 2.1, speed: -0.0068, dash: [22, 10], trail: [] },
+        { tiltX: 0.22, tiltZ: 0.96, radiusMul: 1.14, angle: 4.0, speed: 0.0115, dash: [4, 8], trail: [] },
+        { tiltX: -0.82, tiltZ: 0.35, radiusMul: 1.62, angle: 5.2, speed: -0.0046, dash: [34, 14], trail: [] }
+      ];
+
+      // Ambient spatial particles
+      const dust = Array.from({ length: 44 }, () => ({
+        x: Math.random(),
+        y: Math.random(),
+        r: 0.8 + Math.random() * 1.6,
+        vy: -0.00016 - Math.random() * 0.00024,
+        alpha: 0.14 + Math.random() * 0.36
+      }));
+
+      // Interactive pointer, drag inertia, zoom, and click ripples
+      const pointer = {
+        active: false,
+        px: 0,
+        py: 0,
+        nx: 0,
+        ny: 0
+      };
+      const drag = {
+        down: false,
+        moved: false,
+        startX: 0,
+        startY: 0,
+        lastX: 0,
+        lastY: 0,
+        velX: 0,
+        velY: 0
+      };
+      let zoom = 1;
+      let targetZoom = 1;
+      const clickRipples = [];
+      const solarSparks = [];
+      const solarWaves = [];
+
+      function triggerSolarEntryBurst() {
+        solarWaves.length = 0;
+        for (let i = 0; i < 3; i++) {
+          solarWaves.push({ progress: -i * 0.16, speed: 0.014 + i * 0.002 });
+        }
+        for (let i = 0; i < 64; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 1.8 + Math.random() * 6.8;
+          solarSparks.push({
+            x: 0,
+            y: 0,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1,
+            decay: 0.009 + Math.random() * 0.012,
+            size: 1.2 + Math.random() * 2.8,
+            twinkle: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      stageEl.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+        drag.down = true;
+        drag.moved = false;
+        drag.startX = drag.lastX = e.clientX;
+        drag.startY = drag.lastY = e.clientY;
+        drag.velX = 0;
+        drag.velY = 0;
+        stageEl.classList.add('dragging');
+        if (stageEl.setPointerCapture) stageEl.setPointerCapture(e.pointerId);
+      });
+
+      stageEl.addEventListener('pointermove', (e) => {
+        const rect = stageEl.getBoundingClientRect();
+        pointer.active = true;
+        pointer.px = e.clientX - rect.left;
+        pointer.py = e.clientY - rect.top;
+        pointer.nx = (pointer.px / rect.width - 0.5) * 2;
+        pointer.ny = (pointer.py / rect.height - 0.5) * 2;
+
+        if (drag.down) {
+          const dx = e.clientX - drag.lastX;
+          const dy = e.clientY - drag.lastY;
+          if (Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) > 6) {
+            drag.moved = true;
+          }
+          rotY += dx * 0.0075;
+          rotX = Math.max(-1.25, Math.min(1.25, rotX + dy * 0.0065));
+          drag.velY = dx * 0.0042;
+          drag.velX = dy * 0.0036;
+          drag.lastX = e.clientX;
+          drag.lastY = e.clientY;
+          requestStaticRedraw();
+        }
+      });
+
+      function endDrag(e) {
+        if (!drag.down) return;
+        drag.down = false;
+        stageEl.classList.remove('dragging');
+        if (!drag.moved) {
+          // Clean click / tap -> emit shockwave + ripple + burst packets
+          const rect = stageEl.getBoundingClientRect();
+          clickRipples.push({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+            r: 8,
+            alpha: 0.9
+          });
+          state.shockwave = 1;
+          spawnBurstPackets(10);
+          requestStaticRedraw();
+        }
+      }
+
+      stageEl.addEventListener('pointerup', endDrag);
+      stageEl.addEventListener('pointercancel', endDrag);
+      stageEl.addEventListener('pointerleave', () => {
+        pointer.active = false;
+      });
+
+      // Mouse wheel smooth zoom
+      stageEl.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        targetZoom = Math.max(0.76, Math.min(1.38, targetZoom - e.deltaY * 0.0008));
+        requestStaticRedraw();
+      }, { passive: false });
+
+      // Double-click toggles zoom / resets camera cleanly
+      stageEl.addEventListener('dblclick', () => {
+        targetZoom = Math.abs(targetZoom - 1) < 0.08 ? 1.24 : 1;
+        state.shockwave = Math.max(state.shockwave, 0.7);
+        requestStaticRedraw();
+      });
+
+      function resizeCanvas() {
+        const rect = stageEl.getBoundingClientRect();
+        const nextW = Math.max(1, Math.floor(rect.width));
+        const nextH = Math.max(1, Math.floor(rect.height));
+        const maxDpr = window.innerWidth < 640 ? 1.5 : 2;
+        const nextDpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+        if (nextW === cw && nextH === ch && nextDpr === dpr) return;
+        cw = nextW;
+        ch = nextH;
+        dpr = nextDpr;
+        canvas.width = Math.floor(cw * dpr);
+        canvas.height = Math.floor(ch * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        requestStaticRedraw();
+      }
+
+      if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resizeCanvas).observe(stageEl);
+      window.addEventListener('resize', resizeCanvas);
+
+      if (typeof IntersectionObserver !== 'undefined') {
+        new IntersectionObserver((entries) => {
+          isStageInView = entries[0].isIntersecting;
+          syncAnimationLoop();
+        }, { threshold: 0.05 }).observe(stageEl);
+      }
+
+      document.addEventListener('visibilitychange', () => {
+        isPageVisible = !document.hidden;
+        syncAnimationLoop();
+      });
+
+      if (reducedMotionQuery.addEventListener) {
+        reducedMotionQuery.addEventListener('change', (e) => {
+          prefersReducedMotion = e.matches;
+          syncAnimationLoop();
+        });
+      }
+
+      let rotY = 0.45;
+      let rotX = 0.24;
+      let innerRotY = -0.3;
+      let time = 0;
+
+      function getPalette() {
+        if (state.mode === 'error') return { primary: [244, 63, 94], secondary: [251, 113, 133] };
+        if (state.mode === 'success') return { primary: [245, 197, 66], secondary: [253, 224, 120] };
+        if (state.mode === 'otp') return { primary: [56, 189, 248], secondary: [16, 232, 154] };
+        return { primary: [16, 232, 154], secondary: [56, 189, 248] };
+      }
+
+      function rotate3D(x, y, z, ax, ay) {
+        const cosY = Math.cos(ay), sinY = Math.sin(ay);
+        const x1 = x * cosY - z * sinY;
+        const z1 = z * cosY + x * sinY;
+        const cosX = Math.cos(ax), sinX = Math.sin(ax);
+        const y2 = y * cosX - z1 * sinX;
+        const z2 = z1 * cosX + y * sinX;
+        return { x: x1, y: y2, z: z2 };
+      }
+
+      function projectOrbitPoint(cx, cy, radius, angle, tiltX, tiltZ) {
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        const y1 = y * Math.cos(tiltX);
+        const z1 = y * Math.sin(tiltX);
+        const x2 = x * Math.cos(tiltZ) - y1 * Math.sin(tiltZ);
+        const y2 = y1 * Math.cos(tiltZ) + x * Math.sin(tiltZ);
+        const scale = 720 / (720 + z1);
+        return { x: cx + x2 * scale, y: cy + y2 * scale, scale };
+      }
+
+      function drawOrbitRing(cx, cy, radius, orb, tiltOffX, tiltOffZ, rgb, secRgb, advance) {
+        const tx = orb.tiltX + tiltOffX;
+        const tz = orb.tiltZ + tiltOffZ;
+        const segments = 76;
+
+        ctx.save();
+        ctx.setLineDash(orb.dash);
+        ctx.beginPath();
+        for (let i = 0; i <= segments; i++) {
+          const p = projectOrbitPoint(cx, cy, radius, (i / segments) * Math.PI * 2, tx, tz);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.strokeStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.22)`;
+        ctx.lineWidth = 1.1;
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        // Satellite + fading trail
+        const sat = projectOrbitPoint(cx, cy, radius, orb.angle, tx, tz);
+        if (advance) {
+          orb.trail.unshift({ x: sat.x, y: sat.y });
+          if (orb.trail.length > 10) orb.trail.pop();
+        }
+        for (let i = 1; i < orb.trail.length; i++) {
+          const alpha = (1 - i / orb.trail.length) * 0.45;
+          ctx.beginPath();
+          ctx.moveTo(orb.trail[i - 1].x, orb.trail[i - 1].y);
+          ctx.lineTo(orb.trail[i].x, orb.trail[i].y);
+          ctx.strokeStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+          ctx.lineWidth = Math.max(0.8, 2.4 * (1 - i / orb.trail.length));
+          ctx.stroke();
+        }
+
+        ctx.beginPath();
+        ctx.arc(sat.x, sat.y, 3.2 * sat.scale, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.96)`;
+        ctx.shadowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.85)`;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      function drawFrame(advance) {
+        if (!cw || !ch) return;
+        ctx.clearRect(0, 0, cw, ch);
+
+        if (advance) {
+          time += 0.016;
+          state.typingBoost *= 0.94;
+          if (state.shockwave > 0) state.shockwave = Math.max(0, state.shockwave - 0.018);
+          if (state.errorPulse > 0) state.errorPulse = Math.max(0, state.errorPulse - 0.025);
+          if (state.sunFlash > 0) state.sunFlash = Math.max(0, state.sunFlash - 0.011);
+          zoom += (targetZoom - zoom) * 0.09;
+
+          if (!drag.down) {
+            const autoSpeed = state.mode === 'loading' ? 0.024 : 0.0048;
+            rotY += autoSpeed + state.typingBoost * 0.014 + state.sunFlash * 0.028 + drag.velY;
+            rotX = Math.max(-1.25, Math.min(1.25, rotX + drag.velX));
+            drag.velY *= 0.94;
+            drag.velX *= 0.94;
+          }
+          innerRotY -= (state.mode === 'loading' ? 0.032 : 0.0085) + state.typingBoost * 0.016 + state.sunFlash * 0.036;
+        }
+
+        const { primary: rgb, secondary: secRgb } = getPalette();
+        const cx = cw * 0.5;
+        const cy = ch * 0.5;
+        const errorShrink = 1 - state.errorPulse * 0.09;
+        const sunBloom = 1 + Math.sin(state.sunFlash * Math.PI * 0.5) * 0.14;
+        const baseRadius = Math.min(cw, ch) * 0.275 * zoom * errorShrink * sunBloom;
+
+        // 1. Ambient spatial particles (gently attracted to pointer)
+        dust.forEach((d) => {
+          if (advance) {
+            d.y += d.vy * (state.mode === 'loading' ? 2.5 : 1);
+            if (d.y < -0.02) { d.y = 1.02; d.x = Math.random(); }
+          }
+          let dx = d.x * cw;
+          let dy = d.y * ch;
+          if (pointer.active) {
+            const dist = Math.hypot(pointer.px - dx, pointer.py - dy);
+            if (dist < 150 && dist > 1) {
+              const pull = (1 - dist / 150) * 10;
+              dx += ((pointer.px - dx) / dist) * pull;
+              dy += ((pointer.py - dy) / dist) * pull;
+            }
+          }
+          ctx.beginPath();
+          ctx.arc(dx, dy, d.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, ${d.alpha * 0.45})`;
+          ctx.fill();
+        });
+
+        // 2. Soft core radial aura + Solar God-Rays on Success
+        const auraScale = state.mode === 'success' ? 2.45 + state.sunFlash * 0.9 : 1.95;
+        const aura = ctx.createRadialGradient(cx, cy, baseRadius * 0.06, cx, cy, baseRadius * auraScale);
+        if (state.mode === 'success') {
+          aura.addColorStop(0, `rgba(255, 250, 224, ${0.42 + state.sunFlash * 0.52})`);
+          aura.addColorStop(0.28, `rgba(245, 197, 66, ${0.26 + state.sunFlash * 0.34})`);
+          aura.addColorStop(0.62, `rgba(217, 119, 6, ${0.09 + state.sunFlash * 0.14})`);
+          aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        } else {
+          aura.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${0.2 + state.typingBoost * 0.1})`);
+          aura.addColorStop(0.5, `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.06)`);
+          aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        }
+        ctx.fillStyle = aura;
+        ctx.beginPath();
+        ctx.arc(cx, cy, baseRadius * auraScale, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Volumetric rotating solar sunbeams when logged in
+        if (state.mode === 'success' || state.sunFlash > 0.01) {
+          const rayIntensity = state.mode === 'success' ? 0.22 + state.sunFlash * 0.65 : state.sunFlash * 0.65;
+          const rayCount = 18;
+          const maxRayLen = Math.max(cw, ch) * (0.62 + state.sunFlash * 0.35);
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(time * 0.14);
+          for (let i = 0; i < rayCount; i++) {
+            const baseA = (i / rayCount) * Math.PI * 2;
+            const spread = (i % 2 === 0 ? 0.065 : 0.036) * (1 + state.sunFlash * 0.55);
+            const len = maxRayLen * (i % 2 === 0 ? 1 : 0.72);
+            const grad = ctx.createRadialGradient(0, 0, baseRadius * 0.15, 0, 0, len);
+            grad.addColorStop(0, `rgba(255, 250, 220, ${rayIntensity * 0.62})`);
+            grad.addColorStop(0.35, `rgba(245, 197, 66, ${rayIntensity * 0.26})`);
+            grad.addColorStop(1, 'rgba(245, 197, 66, 0)');
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.arc(0, 0, len, baseA - spread, baseA + spread);
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+          }
+          ctx.restore();
+
+          // Anamorphic horizontal solar lens flare streak during entry flash
+          if (state.sunFlash > 0.02) {
+            const flareW = cw * (0.55 + state.sunFlash * 0.55);
+            const flareH = Math.max(3, baseRadius * 0.09 * state.sunFlash);
+            const hGrad = ctx.createLinearGradient(cx - flareW, cy, cx + flareW, cy);
+            hGrad.addColorStop(0, 'rgba(255, 245, 190, 0)');
+            hGrad.addColorStop(0.35, `rgba(245, 197, 66, ${state.sunFlash * 0.35})`);
+            hGrad.addColorStop(0.5, `rgba(255, 253, 238, ${state.sunFlash * 0.92})`);
+            hGrad.addColorStop(0.65, `rgba(245, 197, 66, ${state.sunFlash * 0.35})`);
+            hGrad.addColorStop(1, 'rgba(255, 245, 190, 0)');
+            ctx.fillStyle = hGrad;
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, flareW, flareH, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // Staggered triple golden solar shockwaves
+        for (let i = solarWaves.length - 1; i >= 0; i--) {
+          const w = solarWaves[i];
+          if (advance) w.progress += w.speed;
+          if (w.progress >= 1) {
+            solarWaves.splice(i, 1);
+            continue;
+          }
+          if (w.progress > 0) {
+            const r = baseRadius * (0.45 + w.progress * 2.55);
+            const alpha = (1 - w.progress) * 0.72;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 236, 153, ${alpha})`;
+            ctx.lineWidth = 2.6 * (1 - w.progress * 0.55);
+            ctx.stroke();
+          }
+        }
+
+        // Click ripples
+        for (let i = clickRipples.length - 1; i >= 0; i--) {
+          const rp = clickRipples[i];
+          if (advance) { rp.r += 3.6; rp.alpha -= 0.025; }
+          if (rp.alpha <= 0) { clickRipples.splice(i, 1); continue; }
+          ctx.beginPath();
+          ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${rp.alpha})`;
+          ctx.lineWidth = 1.6;
+          ctx.stroke();
+        }
+
+        // Shockwave ring
+        if (state.shockwave > 0) {
+          const p = 1 - state.shockwave;
+          ctx.beginPath();
+          ctx.arc(cx, cy, baseRadius * (0.55 + p * 1.95), 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${state.shockwave * 0.72})`;
+          ctx.lineWidth = 2.4;
+          ctx.stroke();
+        }
+
+        // 3. Holographic orbital rings
+        const tiltOffX = pointer.active ? pointer.ny * 0.14 : 0;
+        const tiltOffZ = pointer.active ? pointer.nx * 0.14 : 0;
+        orbits.forEach((orb) => {
+          if (advance) {
+            const mul = state.mode === 'loading' ? 3.2 : 1 + state.typingBoost * 1.5;
+            orb.angle += orb.speed * mul;
+          }
+          drawOrbitRing(cx, cy, baseRadius * orb.radiusMul, orb, tiltOffX, tiltOffZ, rgb, secRgb, advance);
+        });
+
+        // 4. Inner counter-rotating geodesic core
+        const innerRadius = baseRadius * 0.48;
+        const innerProj = innerNodes.map((n) => {
+          const p = rotate3D(n.x, n.y, n.z, -rotX * 0.7, innerRotY);
+          const scale = 720 / (720 + p.z * innerRadius);
+          return { x: cx + p.x * innerRadius * scale, y: cy + p.y * innerRadius * scale, z: p.z, scale };
+        });
+
+        for (let i = 0; i < innerEdges.length; i++) {
+          const a = innerProj[innerEdges[i][0]];
+          const b = innerProj[innerEdges[i][1]];
+          const alpha = Math.max(0.08, Math.min(0.42, (1 - (a.z + b.z) * 0.5) * 0.24));
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, ${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+
+        // Central luminous plasma nucleus (white-hot sun core on success)
+        const corePulse = advance ? 1 + Math.sin(time * 3.2) * 0.12 + state.typingBoost * 0.14 + state.sunFlash * 0.45 : 1;
+        const nucleusR = baseRadius * (state.mode === 'success' ? 0.42 : 0.34) * corePulse;
+        const nucleus = ctx.createRadialGradient(cx, cy, 2, cx, cy, nucleusR);
+        if (state.mode === 'success') {
+          nucleus.addColorStop(0, `rgba(255, 254, 240, ${0.95})`);
+          nucleus.addColorStop(0.32, `rgba(253, 224, 120, ${0.82})`);
+          nucleus.addColorStop(0.65, `rgba(245, 197, 66, ${0.32})`);
+          nucleus.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        } else {
+          nucleus.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.75)`);
+          nucleus.addColorStop(0.45, `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.24)`);
+          nucleus.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        }
+        ctx.fillStyle = nucleus;
+        ctx.beginPath();
+        ctx.arc(cx, cy, nucleusR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 5. Outer Geodesic Sphere
+        const outerProj = outerNodes.map((n) => {
+          const breathe = advance ? 1 + Math.sin(time * 2.0 + n.phase) * 0.022 : 1;
+          const p = rotate3D(n.x * breathe, n.y * breathe, n.z * breathe, rotX, rotY);
+          const scale = 720 / (720 + p.z * baseRadius);
+          return { x: cx + p.x * baseRadius * scale, y: cy + p.y * baseRadius * scale, z: p.z, scale, hub: n.hub };
+        });
+
+        // Outer edges (dimmer on back face for crisp 3D depth)
+        for (let i = 0; i < outerEdges.length; i++) {
+          const a = outerProj[outerEdges[i][0]];
+          const b = outerProj[outerEdges[i][1]];
+          const avgZ = (a.z + b.z) * 0.5;
+          const alpha = avgZ > 0.25 ? 0.05 : Math.max(0.07, Math.min(0.46, (1 - avgZ) * 0.25));
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+          ctx.lineWidth = avgZ < 0 ? 1.15 : 0.65;
+          ctx.stroke();
+        }
+
+        // Loading scan sweep across sphere
+        if (state.mode === 'loading') {
+          const scanY = cy + Math.sin(time * 4.5) * baseRadius * 0.92;
+          const halfW = Math.sqrt(Math.max(0, baseRadius * baseRadius - (scanY - cy) * (scanY - cy)));
+          const grad = ctx.createLinearGradient(cx - halfW, scanY, cx + halfW, scanY);
+          grad.addColorStop(0, 'rgba(0,0,0,0)');
+          grad.addColorStop(0.5, `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.78)`);
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.beginPath();
+          ctx.moveTo(cx - halfW, scanY);
+          ctx.lineTo(cx + halfW, scanY);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 2.2;
+          ctx.stroke();
+        }
+
+        // Data packets traveling along edges
+        for (let i = packets.length - 1; i >= 0; i--) {
+          const pkt = packets[i];
+          if (advance) {
+            const mul = state.mode === 'loading' ? 2.6 : 1 + state.typingBoost * 1.4;
+            pkt.t += pkt.speed * mul;
+            if (pkt.t >= 1) {
+              if (pkt.boosted) {
+                packets.splice(i, 1);
+                continue;
+              }
+              pkt.t = 0;
+              pkt.edgeIdx = Math.floor(Math.random() * outerEdges.length);
+            }
+          }
+          const a = outerProj[outerEdges[pkt.edgeIdx][0]];
+          const b = outerProj[outerEdges[pkt.edgeIdx][1]];
+          if ((a.z + b.z) * 0.5 < 0.45) {
+            const px = a.x + (b.x - a.x) * pkt.t;
+            const py = a.y + (b.y - a.y) * pkt.t;
+            ctx.beginPath();
+            ctx.arc(px, py, pkt.boosted ? 2.8 : 2.1, 0, Math.PI * 2);
+            ctx.fillStyle = pkt.boosted
+              ? `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.98)`
+              : `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.92)`;
+            ctx.fill();
+          }
+        }
+
+        // 6. Interactive magnetic energy beams from closest front nodes to cursor
+        if (pointer.active && !drag.down) {
+          let beamCount = 0;
+          for (let i = 0; i < outerProj.length && beamCount < 4; i++) {
+            const n = outerProj[i];
+            if (n.z > 0.15) continue;
+            const dist = Math.hypot(pointer.px - n.x, pointer.py - n.y);
+            if (dist < 135) {
+              const strength = 1 - dist / 135;
+              ctx.beginPath();
+              ctx.moveTo(n.x, n.y);
+              ctx.lineTo(pointer.px, pointer.py);
+              ctx.strokeStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, ${strength * 0.55})`;
+              ctx.lineWidth = 1.2;
+              ctx.stroke();
+              beamCount++;
+            }
+          }
+        }
+
+        // Outer nodes sorted back-to-front
+        outerProj.slice().sort((a, b) => b.z - a.z).forEach((n) => {
+          const front = Math.max(0.16, Math.min(1, (1 - n.z) * 0.56));
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, (n.hub ? 3.2 : 1.85) * n.scale, 0, Math.PI * 2);
+          ctx.fillStyle = n.hub
+            ? `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${front})`
+            : `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, ${front * 0.85})`;
+          ctx.fill();
+        });
+
+        // Golden solar embers / sparks erupting outward on entry
+        for (let i = solarSparks.length - 1; i >= 0; i--) {
+          const sp = solarSparks[i];
+          if (advance) {
+            sp.x += sp.vx;
+            sp.y += sp.vy;
+            sp.vx *= 0.972;
+            sp.vy *= 0.972;
+            sp.life -= sp.decay;
+          }
+          if (sp.life <= 0) {
+            solarSparks.splice(i, 1);
+            continue;
+          }
+          const twinkle = 0.65 + Math.sin(time * 16 + sp.twinkle) * 0.35;
+          ctx.beginPath();
+          ctx.arc(cx + sp.x, cy + sp.y, sp.size * sp.life, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 244, 196, ${sp.life * twinkle})`;
+          ctx.fill();
+        }
+      }
+
+      function requestStaticRedraw() {
+        if (prefersReducedMotion && cw > 0 && ch > 0) drawFrame(false);
+      }
+
+      function tick() {
+        drawFrame(true);
+        rafId = requestAnimationFrame(tick);
+      }
+
+      function syncAnimationLoop() {
+        const shouldRun = isPageVisible && isStageInView && !prefersReducedMotion;
+        if (shouldRun && rafId === null) {
+          rafId = requestAnimationFrame(tick);
+        } else if (!shouldRun && rafId !== null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+          if (prefersReducedMotion) drawFrame(false);
+        } else if (prefersReducedMotion) {
+          drawFrame(false);
+        }
+      }
+
+      resizeCanvas();
+      syncAnimationLoop();
+    })();
+  </script>
+</body>
+</html>
