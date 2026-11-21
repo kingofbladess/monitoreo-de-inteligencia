@@ -1,24 +1,21 @@
-# Monitoreo de Inteligencia — Acceso Seguro
+# Monitoreo de Inteligencia — Acceso Seguro y Centro de Control
 
-Interfaz de inicio de sesión moderna en diseño dividido (*split-screen*) con visualización 3D interactiva a la izquierda y autenticación con verificación en dos pasos (2FA / OTP) a la derecha.
+Aplicación web completa compuesta por una pantalla de acceso split-screen con animación 3D interactiva y un **Centro de Monitoreo** en tiempo real.
 
-## Características principales
+## Módulos incluidos
 
-- **Animación 3D interactiva (Canvas 2D):**
-  - Esfera geodésica exterior + núcleo interno contrarrotatorio + 4 anillos orbitales segmentados con satélites y estelas.
-  - Arrastrar para rotar con inercia, rayos magnéticos al mover el cursor, onda expansiva y ráfaga de paquetes al hacer clic, y zoom suave con rueda o doble clic.
-  - Pausa automática cuando la pestaña o el área no están visibles (`visibilitychange` + `IntersectionObserver`) y soporte para `prefers-reduced-motion`.
-- **Efecto de destello solar dorado al ingresar:**
-  - Resplandor radial, 18 rayos de sol rotatorios, destello anamórfico horizontal, 3 ondas doradas concéntricas, 64 chispas solares y barrido dorado sobre la tarjeta de acceso.
-- **Login minimalista y accesible:**
-  - Validación inline (`aria-invalid` / `aria-describedby`), detección de Bloq Mayús, modal accesible con cierre por `Escape` y trampa de foco, verificación 2FA OTP y bloqueo temporal tras 3 intentos fallidos.
+1. **Acceso Seguro (`index.html` / `acceso_seguro_monitoreo_inteligente.html`):**
+   - Panel izquierdo con esfera geodésica 3D, núcleo interno contrarrotatorio, 4 anillos orbitales con satélites, rotación con arrastre e inercia, rayos magnéticos al cursor, onda expansiva al clic y zoom suave.
+   - Verificación 2FA / OTP en modo demo, bloqueo tras 3 intentos fallidos y **destello solar dorado** al ingresar con acceso directo al Centro de Monitoreo.
 
-## Uso local
+2. **Centro de Monitoreo (`monitor.html`, `monitor.css`, `monitor.js`):**
+   - **Resumen general:** KPIs en vivo, mapa táctico interactivo de nodos con escaneo de red, gráfica de telemetría en tiempo real, alertas recientes y salud de infraestructura.
+   - **Cámaras y Sensores:** 6 feeds en vivo (Óptico, Térmico y LIDAR) con filtros y vista ampliada en modal.
+   - **Red de Nodos:** Tabla interactiva con búsqueda, filtros y acciones rápidas (`Ping`, `Aislar`/`Reactivar`, `Reiniciar`).
+   - **Centro de Alertas:** Simulación de alertas, reconocimiento, resolución individual o masiva y exportación de reporte JSON.
+   - **Configuración:** Selector de tema (`Esmeralda`, `Dorado Solar`, `Cian Táctico`), frecuencia de telemetría y escaneo automático.
 
-Abre `index.html` o `acceso_seguro_monitoreo_inteligente.html` directamente en cualquier navegador moderno (no requiere servidor ni instalación de dependencias).
+## Demo en vivo
 
-### Credenciales de demostración
-
-- **Usuario:** `admin` | **Contraseña:** `Monitor2026!`
-- **Usuario alterno:** `operador` | **Contraseña:** `Seguro2026!`
-- El código OTP de 6 dígitos en modo demo se muestra en pantalla junto al botón **Autocompletar**.
+- **Acceso Seguro:** https://kingofbladess.github.io/monitoreo-de-inteligencia/
+- **Credenciales demo:** `admin` / `Monitor2026!` (código OTP visible en pantalla con botón **Autocompletar**).

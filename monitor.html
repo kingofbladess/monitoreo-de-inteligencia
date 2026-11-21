@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoreo de Inteligencia — Centro de Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="monitor.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ============================================================
+         SIDEBAR NAVIGATION
+    ============================================================ -->
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div>
+        <div class="brand">
+          <div class="brand-emblem" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L3 7v6c0 5.5 3.8 10.4 9 12 5.2-1.6 9-6.5 9-12V7l-9-5z"/>
+              <circle cx="12" cy="11.5" r="2.6"/>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-title">Monitoreo de Inteligencia</div>
+            <div class="brand-sub">CENTRO DE CONTROL</div>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button type="button" class="nav-btn active" data-view="overview">
+            <span class="nav-btn-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+              <span>Resumen</span>
+            </span>
+          </button>
+
+          <button type="button" class="nav-btn" data-view="feeds">
+            <span class="nav-btn-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              <span>Cámaras y Sensores</span>
+            </span>
+          </button>
+
+          <button type="button" class="nav-btn" data-view="nodes">
+            <span class="nav-btn-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="10.5" y1="7.5" x2="6.5" y2="16.5"/><line x1="13.5" y1="7.5" x2="17.5" y2="16.5"/></svg>
+              <span>Red de Nodos</span>
+            </span>
+          </button>
+
+          <button type="button" class="nav-btn" data-view="alerts">
+            <span class="nav-btn-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>Alertas</span>
+            </span>
+            <span class="nav-badge" id="nav-alert-badge">2</span>
+          </button>
+
+          <button type="button" class="nav-btn" data-view="settings">
+            <span class="nav-btn-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span>Configuración</span>
+            </span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="operator-card">
+          <div class="operator-avatar" id="op-avatar">AD</div>
+          <div>
+            <div class="operator-name" id="op-name">Admin</div>
+            <div class="operator-role" id="op-role">SESIÓN 2FA ACTIVA</div>
+          </div>
+        </div>
+        <button type="button" class="btn-logout" id="btn-logout-monitor">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         MAIN WORKSPACE
+    ============================================================ -->
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="global-search" class="search-input" placeholder="Buscar nodo, alerta o ubicación..." aria-label="Buscar nodos o alertas" />
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="status-pill" id="global-status-pill" aria-live="polite">
+            <span class="status-dot"></span>
+            <span id="global-status-text">SISTEMA ÓPTIMO</span>
+          </div>
+          <div class="clock-pill" id="live-clock">00:00:00</div>
+          <button type="button" class="btn-action danger" id="btn-sim-alert">Simular alerta</button>
+          <button type="button" class="btn-action" id="btn-export-report">Exportar JSON</button>
+        </div>
+      </header>
+
+      <main class="content-wrap">
+        <!-- VIEW 1: OVERVIEW -->
+        <section class="view-section active" id="view-overview" aria-label="Resumen general">
+          <div class="section-head">
+            <div>
+              <h1 class="section-title">Centro de Monitoreo</h1>
+              <p class="section-sub">Telemetría global, mapa táctico de nodos e incidentes en tiempo real.</p>
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            <article class="kpi-card">
+              <div class="kpi-label">Nodos Activos</div>
+              <div class="kpi-value accent" id="kpi-nodes">10 / 10</div>
+              <div class="kpi-meta">Sincronización cifrada TLS 1.3</div>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-label">Eventos Interceptados</div>
+              <div class="kpi-value gold" id="kpi-threats">24</div>
+              <div class="kpi-meta">Últimas 24 horas</div>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-label">Latencia Media</div>
+              <div class="kpi-value" id="kpi-latency">11 ms</div>
+              <div class="kpi-meta">Enlace troncal estable</div>
+            </article>
+            <article class="kpi-card">
+              <div class="kpi-label">Disponibilidad</div>
+              <div class="kpi-value accent" id="kpi-uptime">99.98%</div>
+              <div class="kpi-meta">Sin caídas críticas</div>
+            </article>
+          </div>
+
+          <div class="bento-grid">
+            <article class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Mapa Táctico de Red</h2>
+                  <div class="panel-sub">Haz clic en cualquier nodo para inspeccionar telemetría</div>
+                </div>
+                <button type="button" class="btn-action primary" id="btn-map-scan">Escanear red</button>
+              </div>
+              <div class="canvas-box tall">
+                <canvas id="tactical-map-canvas"></canvas>
+                <div class="map-readout" id="map-node-readout">Selecciona un nodo en el mapa táctico</div>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">Telemetría de Tráfico</h2>
+                  <div class="panel-sub">Flujo cifrado y carga de paquetes en vivo</div>
+                </div>
+              </div>
+              <div class="canvas-box chart">
+                <canvas id="telemetry-chart-canvas"></canvas>
+              </div>
+              <div class="chart-stats">
+                <div class="mini-stat">
+                  <div class="mini-stat-label">Ancho banda</div>
+                  <div class="mini-stat-val" id="chart-throughput">4.8 Gbps</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-label">Paquetes/s</div>
+                  <div class="mini-stat-val" id="chart-packets">18.4k</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-label">Anomalías</div>
+                  <div class="mini-stat-val" id="chart-anomalies">0.02%</div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="bento-grid">
+            <article class="panel-card">
+              <div class="panel-head">
+                <h2 class="panel-title">Alertas Recientes</h2>
+                <button type="button" class="chip-btn" data-view-jump="alerts">Ver todas</button>
+              </div>
+              <div class="alerts-list" id="overview-alerts-list"></div>
+            </article>
+
+            <article class="panel-card">
+              <div class="panel-head">
+                <h2 class="panel-title">Salud de Infraestructura</h2>
+                <span class="panel-sub">Clúster principal</span>
+              </div>
+              <div class="health-grid">
+                <div class="health-row">
+                  <div class="health-meta"><span>Procesamiento IA (CPU)</span><strong id="health-cpu-val">42%</strong></div>
+                  <div class="bar-track"><div class="bar-fill" id="health-cpu" style="width:42%"></div></div>
+                </div>
+                <div class="health-row">
+                  <div class="health-meta"><span>Memoria Telemétrica</span><strong id="health-mem-val">58%</strong></div>
+                  <div class="bar-track"><div class="bar-fill" id="health-mem" style="width:58%"></div></div>
+                </div>
+                <div class="health-row">
+                  <div class="health-meta"><span>Capacidad de Enlace</span><strong id="health-net-val">31%</strong></div>
+                  <div class="bar-track"><div class="bar-fill" id="health-net" style="width:31%"></div></div>
+                </div>
+                <div class="health-row">
+                  <div class="health-meta"><span>Integridad Cifrado E2E</span><strong id="health-enc-val">100%</strong></div>
+                  <div class="bar-track"><div class="bar-fill" id="health-enc" style="width:100%"></div></div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- VIEW 2: FEEDS -->
+        <section class="view-section" id="view-feeds" aria-label="Cámaras y sensores en vivo">
+          <div class="section-head">
+            <div>
+              <h1 class="section-title">Cámaras y Sensores</h1>
+              <p class="section-sub">Supervisión óptica, térmica y LIDAR en tiempo real.</p>
+            </div>
+            <div class="filter-bar">
+              <button type="button" class="filter-pill active" data-feed-filter="all">Todas</button>
+              <button type="button" class="filter-pill" data-feed-filter="alert">Con alerta</button>
+              <button type="button" class="filter-pill" data-feed-filter="ok">Óptimas</button>
+            </div>
+          </div>
+          <div class="feeds-grid" id="feeds-grid"></div>
+        </section>
+
+        <!-- VIEW 3: NODES -->
+        <section class="view-section" id="view-nodes" aria-label="Red de nodos">
+          <div class="section-head">
+            <div>
+              <h1 class="section-title">Red de Nodos</h1>
+              <p class="section-sub">Control directo, diagnóstico de latencia y aislamiento preventivo.</p>
+            </div>
+            <div class="filter-bar">
+              <button type="button" class="filter-pill active" data-node-filter="all">Todos</button>
+              <button type="button" class="filter-pill" data-node-filter="online">En línea</button>
+              <button type="button" class="filter-pill" data-node-filter="warn">Advertencia</button>
+              <button type="button" class="filter-pill" data-node-filter="isolated">Aislados</button>
+            </div>
+          </div>
+          <article class="panel-card">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nodo</th>
+                    <th>Ubicación</th>
+                    <th>Estado</th>
+                    <th>Latencia</th>
+                    <th>CPU</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="nodes-tbody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- VIEW 4: ALERTS -->
+        <section class="view-section" id="view-alerts" aria-label="Centro de alertas">
+          <div class="section-head">
+            <div>
+              <h1 class="section-title">Centro de Alertas</h1>
+              <p class="section-sub">Gestión de incidentes, reconocimiento y resolución operativa.</p>
+            </div>
+            <div class="filter-bar">
+              <button type="button" class="filter-pill active" data-alert-filter="all">Todas</button>
+              <button type="button" class="filter-pill" data-alert-filter="critical">Críticas</button>
+              <button type="button" class="filter-pill" data-alert-filter="warning">Advertencias</button>
+              <button type="button" class="filter-pill" data-alert-filter="info">Info</button>
+              <button type="button" class="btn-action" id="btn-resolve-all">Resolver todas</button>
+            </div>
+          </div>
+          <div class="alerts-list" id="alerts-full-list"></div>
+        </section>
+
+        <!-- VIEW 5: SETTINGS -->
+        <section class="view-section" id="view-settings" aria-label="Configuración del sistema">
+          <div class="section-head">
+            <div>
+              <h1 class="section-title">Configuración</h1>
+              <p class="section-sub">Personaliza la apariencia y la cadencia de telemetría.</p>
+            </div>
+          </div>
+          <div class="settings-grid">
+            <article class="panel-card">
+              <h2 class="panel-title">Tema Visual</h2>
+              <p class="panel-sub">Cambia la paleta principal del centro de control.</p>
+              <div class="theme-swatches">
+                <button type="button" class="swatch-btn active" data-accent-theme="emerald">
+                  <span class="swatch-dot" style="background:#10e89a"></span> Esmeralda
+                </button>
+                <button type="button" class="swatch-btn" data-accent-theme="gold">
+                  <span class="swatch-dot" style="background:#f5c542"></span> Dorado Solar
+                </button>
+                <button type="button" class="swatch-btn" data-accent-theme="cyan">
+                  <span class="swatch-dot" style="background:#38bdf8"></span> Cian Táctico
+                </button>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <h2 class="panel-title">Telemetría y Escaneo</h2>
+              <label style="display:grid;gap:6px;font-size:13px;color:var(--text-soft);">
+                <span>Intervalo de actualización</span>
+                <select id="select-refresh-rate" class="setting-select">
+                  <option value="1000">1 segundo (Tiempo real)</option>
+                  <option value="2000" selected>2 segundos (Equilibrado)</option>
+                  <option value="5000">5 segundos (Bajo consumo)</option>
+                </select>
+              </label>
+              <label class="toggle-row">
+                <span>Escaneo automático del mapa táctico</span>
+                <input type="checkbox" id="chk-auto-scan" checked />
+              </label>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Feed Fullscreen Modal -->
+  <div class="modal-backdrop" id="modal-feed" role="dialog" aria-modal="true" aria-labelledby="modal-feed-title" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h3 class="panel-title" id="modal-feed-title">Sensor en vivo</h3>
+          <div class="panel-sub" id="modal-feed-meta">EN LÍNEA • 60 FPS</div>
+        </div>
+        <button type="button" class="modal-close" data-close-modal="modal-feed" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="canvas-box tall">
+        <canvas id="modal-feed-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="monitor-toast" role="status" aria-live="polite"></div>
+
+  <script src="monitor.js"></script>
+</body>
+</html>
