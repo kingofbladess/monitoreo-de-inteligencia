@@ -99,37 +99,56 @@
   }
   function drawMap(t) {
     if (!mapCtx || !mapSize.w) return;
-    const { w, h } = mapSize, ctx = mapCtx, accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#10e89a';
-    ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#050a11'; ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = 'rgba(80,150,160,.10)'; ctx.lineWidth = 1;
-    for (let x = 0; x < w; x += 28) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-    for (let y = 0; y < h; y += 28) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-    const cx = w * .5, cy = h * .5, radar = Math.min(w, h) * (.15 + ((t % 9000) / 9000) * .8);
-    ctx.strokeStyle = 'rgba(16,232,154,.15)'; ctx.beginPath(); ctx.arc(cx, cy, radar, 0, Math.PI * 2); ctx.stroke();
-    ctx.strokeStyle = 'rgba(16,232,154,.14)';
-    nodes.forEach((n, i) => { const p = points[i], q = points[(i + 1) % points.length]; if (i % 2 === 0) { ctx.beginPath(); ctx.moveTo(p.x * w, p.y * h); ctx.lineTo(q.x * w, q.y * h); ctx.stroke(); } });
+    const { w, h } = mapSize, ctx = mapCtx;
+    const cs = getComputedStyle(document.documentElement);
+    const accent = cs.getPropertyValue('--accent').trim() || '#10e89a';
+    const accentRgb = cs.getPropertyValue('--accent-rgb').trim() || '16, 232, 154';
+    const accent2Rgb = cs.getPropertyValue('--accent-2-rgb').trim() || '56, 189, 248';
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = 'rgba(255,255,255,.045)'; ctx.lineWidth = 1;
+    for (let x = 0; x < w; x += 32) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+    for (let y = 0; y < h; y += 32) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    const cx = w * .5, cy = h * .5, radar = Math.min(w, h) * (.15 + ((t % 9000) / 9000) * .82);
+    ctx.strokeStyle = `rgba(${accentRgb}, .18)`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(cx, cy, radar, 0, Math.PI * 2); ctx.stroke();
+    nodes.forEach((n, i) => {
+      const p = points[i], q = points[(i + 1) % points.length];
+      if (i % 2 === 0 || i === mapHover || i === mapSelection) {
+        ctx.strokeStyle = `rgba(${accent2Rgb}, .2)`; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(p.x * w, p.y * h); ctx.lineTo(q.x * w, q.y * h); ctx.stroke();
+        if (!reducedMotion) {
+          const prog = ((t / 2400) + i * 0.27) % 1;
+          const px = (p.x + (q.x - p.x) * prog) * w, py = (p.y + (q.y - p.y) * prog) * h;
+          ctx.beginPath(); ctx.arc(px, py, 2, 0, Math.PI * 2); ctx.fillStyle = `rgba(${accentRgb}, .88)`; ctx.fill();
+        }
+      }
+    });
     nodes.forEach((n, i) => {
       const p = points[i], x = p.x * w, y = p.y * h, color = n.status === 'warn' ? '#fbbf24' : n.status === 'isolated' ? '#f43f5e' : accent;
-      const pulse = 3 + (reducedMotion ? 0 : (Math.sin(t / 480 + p.phase) + 1) * 1.2);
-      if (i === mapHover || i === mapSelection) { ctx.beginPath(); ctx.arc(x, y, 12, 0, 7); ctx.fillStyle = `${color}30`; ctx.fill(); }
-      ctx.beginPath(); ctx.arc(x, y, pulse, 0, 7); ctx.fillStyle = color; ctx.shadowBlur = 12; ctx.shadowColor = color; ctx.fill(); ctx.shadowBlur = 0;
-      if (i === mapHover || i === mapSelection) { ctx.fillStyle = '#d8e6ef'; ctx.font = '10px monospace'; ctx.fillText(n.id, x + 9, y - 8); }
+      const pulse = 3.2 + (reducedMotion ? 0 : (Math.sin(t / 480 + p.phase) + 1) * 1.25);
+      if (i === mapHover || i === mapSelection) { ctx.beginPath(); ctx.arc(x, y, 14, 0, 7); ctx.fillStyle = `${color}30`; ctx.fill(); ctx.strokeStyle = `${color}88`; ctx.lineWidth = 1.2; ctx.stroke(); }
+      ctx.beginPath(); ctx.arc(x, y, pulse, 0, 7); ctx.fillStyle = color; ctx.shadowBlur = 14; ctx.shadowColor = color; ctx.fill(); ctx.shadowBlur = 0;
+      if (i === mapHover || i === mapSelection) { ctx.fillStyle = '#f8fafc'; ctx.font = '600 10.5px JetBrains Mono, monospace'; ctx.fillText(n.id, x + 11, y - 9); }
     });
-    if (scanPulse > 0) { const progress = 1 - scanPulse; ctx.beginPath(); ctx.arc(cx, cy, progress * Math.max(w, h), 0, 7); ctx.strokeStyle = `rgba(16,232,154,${Math.max(0, .7 * scanPulse)})`; ctx.lineWidth = 2; ctx.stroke(); if (!reducedMotion) scanPulse = Math.max(0, scanPulse - .008); }
-    if (alertPulse > 0) { ctx.fillStyle = `rgba(244,63,94,${alertPulse * .13})`; ctx.fillRect(0, 0, w, h); if (!reducedMotion) alertPulse = Math.max(0, alertPulse - .012); }
+    if (scanPulse > 0) { const progress = 1 - scanPulse; ctx.beginPath(); ctx.arc(cx, cy, progress * Math.max(w, h), 0, 7); ctx.strokeStyle = `rgba(${accentRgb},${Math.max(0, .75 * scanPulse)})`; ctx.lineWidth = 2.2; ctx.stroke(); if (!reducedMotion) scanPulse = Math.max(0, scanPulse - .008); }
+    if (alertPulse > 0) { ctx.fillStyle = `rgba(244,63,94,${alertPulse * .14})`; ctx.fillRect(0, 0, w, h); if (!reducedMotion) alertPulse = Math.max(0, alertPulse - .012); }
   }
   function drawChart() {
     if (!chartCtx || !chartCanvas) return;
     const { w, h } = canvasSetup(chartCanvas) || {}; if (!w || !h) return;
-    const ctx = chartCtx; ctx.clearRect(0, 0, w, h); ctx.strokeStyle = 'rgba(148,163,184,.12)'; ctx.lineWidth = 1;
+    const ctx = chartCtx; ctx.clearRect(0, 0, w, h); ctx.strokeStyle = 'rgba(255,255,255,.065)'; ctx.lineWidth = 1;
     for (let i = 1; i < 5; i++) { const y = h * i / 5; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    const cs = getComputedStyle(document.documentElement);
+    const accent = cs.getPropertyValue('--accent').trim() || '#10e89a';
+    const accent2 = cs.getPropertyValue('--accent-2').trim() || '#38bdf8';
     const drawLine = (key, color, offset) => {
       const pts = history.map((v, i) => ({ x: i * w / (history.length - 1), y: h * (.12 + (1 - v[key]) * .76) + offset }));
-      const grad = ctx.createLinearGradient(0, 0, 0, h); grad.addColorStop(0, `${color}55`); grad.addColorStop(1, `${color}00`);
+      const grad = ctx.createLinearGradient(0, 0, 0, h); grad.addColorStop(0, `${color}44`); grad.addColorStop(1, `${color}00`);
       ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
-      ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.shadowBlur = 8; ctx.shadowColor = color; ctx.stroke(); ctx.shadowBlur = 0;
+      ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.shadowBlur = 10; ctx.shadowColor = color; ctx.stroke(); ctx.shadowBlur = 0;
+      const last = pts[pts.length - 1];
+      if (last) { ctx.beginPath(); ctx.arc(last.x - 2, last.y, 3.6, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.shadowBlur = 10; ctx.shadowColor = color; ctx.fill(); ctx.shadowBlur = 0; }
     };
-    drawLine('a', getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#10e89a', 0); drawLine('b', '#38bdf8', 0);
+    drawLine('a', accent, 0); drawLine('b', accent2, 0);
   }
   function drawFeed(canvas, index, t) {
     const size = canvasSetup(canvas); if (!size) return;
