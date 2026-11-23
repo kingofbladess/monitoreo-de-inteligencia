@@ -130,6 +130,22 @@ body::after {
   z-index: 10;
 }
 
+/* Floating crystal surfaces: restrained highlights keep all three accent themes legible. */
+.sidebar, .panel, .kpi-card, .feed-card, .modal-card {
+  backdrop-filter: blur(26px) saturate(155%);
+  -webkit-backdrop-filter: blur(26px) saturate(155%);
+}
+.sidebar { box-shadow: 14px 0 42px rgba(0,0,0,.18), inset -1px 0 rgba(255,255,255,.08), inset 0 1px rgba(255,255,255,.12); }
+.panel, .kpi-card, .feed-card { position: relative; }
+.panel::before, .kpi-card::before, .feed-card::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), rgba(var(--accent-rgb),.16), transparent);
+}
+* { scrollbar-width: thin; scrollbar-color: rgba(var(--accent-rgb),.34) rgba(255,255,255,.035); }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: rgba(255,255,255,.025); }
+*::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb),.28); border: 2px solid transparent; background-clip: padding-box; border-radius: 999px; }
+
 .brand {
   display: flex;
   align-items: center;
@@ -930,7 +946,7 @@ body::after {
 .feed-canvas-wrap {
   position: relative;
   height: 190px;
-  background: rgba(3, 7, 15, 0.55);
+  background: rgba(3, 7, 15, 0.16);
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
