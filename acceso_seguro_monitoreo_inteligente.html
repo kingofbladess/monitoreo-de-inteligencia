@@ -14,18 +14,17 @@
       --accent-2: #38bdf8;
       --accent-2-rgb: 56, 189, 248;
       --warn: #fbbf24;
-      --bg-page: #05080f;
-      --bg-stage: #070c15;
-      --bg-panel: #0a101b;
-      --bg-card: rgba(13, 20, 33, 0.82);
-      --bg-input: rgba(6, 10, 18, 0.9);
-      --border: rgba(148, 163, 184, 0.14);
-      --border-strong: rgba(148, 163, 184, 0.26);
-      --text-main: #f1f5f9;
-      --text-soft: #94a3b8;
-      --text-dim: #64748b;
-      --radius-lg: 20px;
-      --radius-md: 12px;
+      --bg-page: #030711;
+      --glass-card: linear-gradient(145deg, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.035) 48%, rgba(6, 12, 24, 0.28) 100%);
+      --glass-input: rgba(5, 11, 22, 0.38);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --glass-border-strong: rgba(255, 255, 255, 0.26);
+      --glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 1px 0 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+      --text-main: #f8fafc;
+      --text-soft: #b3c2d4;
+      --text-dim: #7c90a8;
+      --radius-lg: 24px;
+      --radius-md: 14px;
     }
 
     body.state-success {
@@ -33,9 +32,7 @@
       --accent-rgb: 245, 197, 66;
       --accent-2: #fde078;
       --accent-2-rgb: 253, 224, 120;
-      --bg-page: #0c0904;
-      --bg-stage: #140f06;
-      --bg-panel: #151007;
+      --bg-page: #0a0703;
     }
 
     body.state-error {
@@ -43,9 +40,7 @@
       --accent-rgb: 244, 63, 94;
       --accent-2: #fb7185;
       --accent-2-rgb: 251, 113, 133;
-      --bg-page: #10060a;
-      --bg-stage: #17080e;
-      --bg-panel: #18080e;
+      --bg-page: #0f0408;
     }
 
     * {
@@ -57,145 +52,190 @@
     html, body {
       width: 100%;
       min-height: 100dvh;
-      background: var(--bg-page);
+      background-color: var(--bg-page);
       color: var(--text-main);
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
-      transition: background-color 0.55s ease;
+      transition: background-color 0.6s ease;
     }
 
     /* ============================================================
-       SPLIT LAYOUT (LEFT: PURE 3D ANIMATION | RIGHT: CLEAN LOGIN)
+       FULLSCREEN LIVING AURORA & INTERACTIVE 3D ENVIRONMENT
     ============================================================ */
-    .split-shell {
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(420px, 0.8fr);
-      min-height: 100dvh;
-      width: 100%;
-    }
-
-    /* ---------------- LEFT VISUAL STAGE ---------------- */
-    .visual-stage {
-      position: relative;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(var(--accent-rgb), 0.13) 0%, transparent 56%),
-        radial-gradient(circle at 76% 78%, rgba(var(--accent-2-rgb), 0.08) 0%, transparent 50%),
-        linear-gradient(145deg, var(--bg-stage) 0%, #04070d 100%);
-      border-right: 1px solid var(--border);
-      overflow: hidden;
-      isolation: isolate;
-      cursor: grab;
-      user-select: none;
-      transition: background 0.6s ease, border-color 0.45s ease;
-    }
-
-    .visual-stage.dragging {
-      cursor: grabbing;
-    }
-
-    body.state-error .visual-stage {
-      border-right-color: rgba(244, 63, 94, 0.3);
-    }
-
-    .visual-stage::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
-      background-size: 52px 52px;
-      mask-image: radial-gradient(circle at 50% 50%, black 28%, transparent 88%);
-      -webkit-mask-image: radial-gradient(circle at 50% 50%, black 28%, transparent 88%);
-      pointer-events: none;
+    .ambient-aurora {
+      position: fixed;
+      inset: -14%;
       z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(44% 44% at 24% 48%, rgba(var(--accent-rgb), 0.24) 0%, transparent 68%),
+        radial-gradient(42% 40% at 78% 24%, rgba(var(--accent-2-rgb), 0.22) 0%, transparent 68%),
+        radial-gradient(46% 42% at 74% 82%, rgba(var(--accent-rgb), 0.16) 0%, transparent 70%),
+        radial-gradient(36% 36% at 14% 14%, rgba(var(--accent-2-rgb), 0.14) 0%, transparent 70%);
+      filter: blur(36px);
+      animation: auroraDrift 18s ease-in-out infinite alternate;
+      transition: background 0.65s ease;
     }
 
-    #core-canvas {
-      position: absolute;
+    @keyframes auroraDrift {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(2%, -1.5%, 0) scale(1.05); }
+      100% { transform: translate3d(-1.5%, 2%, 0) scale(1.02); }
+    }
+
+    .ambient-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(rgba(255, 255, 255, 0.065) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: radial-gradient(circle at 42% 50%, black 22%, transparent 90%);
+      -webkit-mask-image: radial-gradient(circle at 42% 50%, black 22%, transparent 90%);
+    }
+
+    #env-canvas {
+      position: fixed;
       inset: 0;
       width: 100%;
       height: 100%;
       z-index: 1;
       display: block;
+      cursor: grab;
       touch-action: none;
+    }
+
+    #env-canvas.dragging {
+      cursor: grabbing;
+    }
+
+    /* ============================================================
+       SPLIT FOREGROUND LAYER (LEFT: OPEN 3D STAGE | RIGHT: GLASS LOGIN)
+    ============================================================ */
+    .split-shell {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(420px, 0.82fr);
+      min-height: 100dvh;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .visual-stage {
+      position: relative;
+      pointer-events: none;
     }
 
     /* Only visible UI element on the left stage */
     .brand-mark {
-      position: absolute;
-      top: 30px;
-      left: 36px;
-      z-index: 2;
+      position: fixed;
+      top: 28px;
+      left: 34px;
+      z-index: 4;
       display: inline-flex;
       align-items: center;
       gap: 12px;
       pointer-events: none;
-      padding: 8px 14px 8px 8px;
-      border-radius: 14px;
-      background: rgba(6, 10, 18, 0.45);
-      backdrop-filter: blur(8px);
+      padding: 8px 16px 8px 9px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(6, 12, 24, 0.34));
+      backdrop-filter: blur(20px) saturate(165%);
+      -webkit-backdrop-filter: blur(20px) saturate(165%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.22);
     }
 
     .brand-emblem {
       width: 38px;
       height: 38px;
-      border-radius: 11px;
-      background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.22), rgba(var(--accent-2-rgb), 0.12));
-      border: 1px solid rgba(var(--accent-rgb), 0.42);
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.28), rgba(var(--accent-2-rgb), 0.14));
+      border: 1px solid rgba(var(--accent-rgb), 0.48);
       display: grid;
       place-items: center;
       color: var(--accent);
-      box-shadow: 0 0 22px rgba(var(--accent-rgb), 0.24);
+      box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.32);
       transition: all 0.4s ease;
     }
 
     .brand-name {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 16px;
+      font-size: 15.5px;
       font-weight: 700;
       letter-spacing: 0.06em;
       color: var(--text-main);
       text-transform: uppercase;
-      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
     }
 
-    /* ---------------- RIGHT LOGIN PANEL ---------------- */
+    /* ---------------- RIGHT TRANSPARENT GLASS LOGIN ---------------- */
     .auth-panel {
-      position: relative;
-      background:
-        radial-gradient(circle at 85% 15%, rgba(var(--accent-rgb), 0.07) 0%, transparent 45%),
-        var(--bg-panel);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 32px 36px;
-      transition: background 0.55s ease;
+      padding: 32px 38px;
+      pointer-events: none;
     }
 
     .auth-main {
       width: 100%;
-      max-width: 404px;
+      max-width: 414px;
+      pointer-events: auto;
+      perspective: 1100px;
     }
 
     .auth-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      background: var(--glass-card);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius-lg);
-      padding: 32px 28px 28px;
-      backdrop-filter: blur(18px);
+      padding: 34px 30px 30px;
       box-shadow:
-        0 24px 60px rgba(0, 0, 0, 0.52),
-        0 0 0 1px rgba(255, 255, 255, 0.03) inset;
-      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        0 28px 70px rgba(0, 0, 0, 0.48),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+        var(--glass-specular);
+      transform-style: preserve-3d;
+      transition: border-color 0.4s ease, box-shadow 0.45s ease, transform 0.18s ease-out;
+      --mx: 50%;
+      --my: 0%;
+      --glare-opacity: 0;
+    }
+
+    /* Interactive mouse-tracking crystal light reflection */
+    .auth-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        340px circle at var(--mx) var(--my),
+        rgba(255, 255, 255, 0.16) 0%,
+        rgba(var(--accent-rgb), 0.08) 38%,
+        transparent 72%
+      );
+      opacity: var(--glare-opacity);
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .auth-card > * {
+      position: relative;
+      z-index: 1;
     }
 
     body.state-success .auth-card {
-      position: relative;
-      overflow: hidden;
-      border-color: rgba(245, 197, 66, 0.48);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.54), 0 0 56px rgba(245, 197, 66, 0.24);
+      border-color: rgba(245, 197, 66, 0.5);
+      box-shadow:
+        0 28px 70px rgba(0, 0, 0, 0.52),
+        0 0 60px rgba(245, 197, 66, 0.25),
+        var(--glass-specular);
     }
 
     body.state-success .auth-card::after {
@@ -205,18 +245,38 @@
       background: linear-gradient(
         112deg,
         transparent 38%,
-        rgba(255, 245, 195, 0.24) 49%,
-        rgba(245, 197, 66, 0.12) 54%,
+        rgba(255, 246, 198, 0.28) 49%,
+        rgba(245, 197, 66, 0.14) 54%,
         transparent 64%
       );
       transform: translateX(-120%);
       animation: goldCardSheen 1.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       pointer-events: none;
+      z-index: 2;
     }
 
     @keyframes goldCardSheen {
-      0% { transform: translateX(-115%); opacity: 0.9; }
+      0% { transform: translateX(-115%); opacity: 0.95; }
       100% { transform: translateX(125%); opacity: 0; }
+    }
+
+    body.state-error .auth-card {
+      border-color: rgba(244, 63, 94, 0.5);
+      box-shadow:
+        0 28px 70px rgba(0, 0, 0, 0.55),
+        0 0 48px rgba(244, 63, 94, 0.22),
+        var(--glass-specular);
+    }
+
+    .auth-card.shake {
+      animation: cardShake 0.44s cubic-bezier(.36, .07, .19, .97) both;
+    }
+
+    @keyframes cardShake {
+      10%, 90% { transform: translate3d(-3px, 0, 0); }
+      20%, 80% { transform: translate3d(5px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+      40%, 60% { transform: translate3d(6px, 0, 0); }
     }
 
     /* Fullscreen Solar Flash Overlay on Login Success */
@@ -241,22 +301,6 @@
       100% { opacity: 0; transform: scale(1.14); }
     }
 
-    body.state-error .auth-card {
-      border-color: rgba(244, 63, 94, 0.45);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 42px rgba(244, 63, 94, 0.18);
-    }
-
-    .auth-card.shake {
-      animation: cardShake 0.44s cubic-bezier(.36, .07, .19, .97) both;
-    }
-
-    @keyframes cardShake {
-      10%, 90% { transform: translate3d(-3px, 0, 0); }
-      20%, 80% { transform: translate3d(5px, 0, 0); }
-      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
-      40%, 60% { transform: translate3d(6px, 0, 0); }
-    }
-
     .auth-header {
       margin-bottom: 24px;
     }
@@ -265,10 +309,11 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      padding: 5px 11px;
+      padding: 6px 12px;
       border-radius: 999px;
-      background: rgba(var(--accent-rgb), 0.1);
-      border: 1px solid rgba(var(--accent-rgb), 0.28);
+      background: rgba(var(--accent-rgb), 0.13);
+      border: 1px solid rgba(var(--accent-rgb), 0.34);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
       color: var(--accent);
       font-family: 'JetBrains Mono', monospace;
       font-size: 10.5px;
@@ -280,9 +325,9 @@
 
     .auth-title {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 26px;
+      font-size: 27px;
       font-weight: 700;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
       color: var(--text-main);
       margin-bottom: 6px;
     }
@@ -308,7 +353,7 @@
     .field-label {
       font-size: 12.5px;
       font-weight: 600;
-      color: #cbd5e1;
+      color: #dbe6f5;
     }
 
     .caps-hint {
@@ -340,15 +385,17 @@
 
     .text-input {
       width: 100%;
-      height: 46px;
+      height: 48px;
       padding: 0 42px 0 42px;
       border-radius: var(--radius-md);
-      border: 1px solid var(--border);
-      background: var(--bg-input);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: var(--glass-input);
+      backdrop-filter: blur(14px);
       color: var(--text-main);
       font-family: 'Inter', sans-serif;
       font-size: 14px;
       outline: none;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
       transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     }
 
@@ -357,18 +404,19 @@
     }
 
     .text-input:hover {
-      border-color: var(--border-strong);
+      border-color: rgba(255, 255, 255, 0.24);
+      background: rgba(8, 16, 30, 0.5);
     }
 
     .text-input:focus {
-      border-color: rgba(var(--accent-rgb), 0.78);
-      background: rgba(8, 14, 24, 0.96);
-      box-shadow: 0 0 0 3.5px rgba(var(--accent-rgb), 0.14);
+      border-color: rgba(var(--accent-rgb), 0.8);
+      background: rgba(8, 16, 32, 0.62);
+      box-shadow: 0 0 0 3.5px rgba(var(--accent-rgb), 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.14);
     }
 
     .text-input[aria-invalid="true"] {
-      border-color: rgba(244, 63, 94, 0.75);
-      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.14);
+      border-color: rgba(244, 63, 94, 0.78);
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.16);
     }
 
     .input-box:focus-within .input-icon {
@@ -379,7 +427,7 @@
       display: none;
       margin-top: 6px;
       font-size: 11.5px;
-      color: #fda4af;
+      color: #fecdd3;
       font-family: 'JetBrains Mono', monospace;
     }
 
@@ -392,10 +440,10 @@
       right: 8px;
       width: 32px;
       height: 32px;
-      border-radius: 8px;
+      border-radius: 9px;
       border: none;
       background: transparent;
-      color: var(--text-dim);
+      color: var(--text-soft);
       cursor: pointer;
       display: grid;
       place-items: center;
@@ -405,7 +453,7 @@
     .toggle-pass:hover,
     .toggle-pass:focus-visible {
       color: var(--text-main);
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.1);
       outline: none;
     }
 
@@ -454,9 +502,9 @@
     .btn-primary {
       width: 100%;
       height: 48px;
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.28);
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--accent) 0%, #0ec986 100%);
+      background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.94) 0%, rgba(14, 201, 134, 0.9) 100%);
       color: #03130d;
       font-family: 'Space Grotesk', sans-serif;
       font-size: 15px;
@@ -467,14 +515,14 @@
       align-items: center;
       justify-content: center;
       gap: 9px;
-      box-shadow: 0 10px 26px rgba(var(--accent-rgb), 0.28);
+      box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.45);
       transition: transform 0.16s ease, box-shadow 0.2s ease, filter 0.2s ease;
     }
 
     .btn-primary:hover:not(:disabled) {
       transform: translateY(-1px);
-      filter: brightness(1.06);
-      box-shadow: 0 14px 32px rgba(var(--accent-rgb), 0.38);
+      filter: brightness(1.07);
+      box-shadow: 0 16px 34px rgba(var(--accent-rgb), 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.55);
     }
 
     .btn-primary:active:not(:disabled) {
@@ -501,8 +549,9 @@
       width: 100%;
       height: 44px;
       border-radius: var(--radius-md);
-      border: 1px solid var(--border-strong);
-      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.055);
+      backdrop-filter: blur(12px);
       color: var(--text-main);
       font-family: 'Space Grotesk', sans-serif;
       font-size: 14px;
@@ -512,12 +561,13 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
       transition: all 0.2s ease;
     }
 
     .btn-ghost:hover:not(:disabled) {
-      border-color: rgba(var(--accent-rgb), 0.55);
-      background: rgba(var(--accent-rgb), 0.08);
+      border-color: rgba(var(--accent-rgb), 0.58);
+      background: rgba(var(--accent-rgb), 0.12);
       color: var(--accent);
     }
 
@@ -542,10 +592,10 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      padding: 9px 12px;
-      border-radius: 10px;
-      background: rgba(var(--accent-2-rgb), 0.09);
-      border: 1px solid rgba(var(--accent-2-rgb), 0.28);
+      padding: 10px 13px;
+      border-radius: 12px;
+      background: rgba(var(--accent-2-rgb), 0.12);
+      border: 1px solid rgba(var(--accent-2-rgb), 0.34);
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       color: #bae6fd;
@@ -558,11 +608,11 @@
     }
 
     .otp-autofill-btn {
-      background: rgba(var(--accent-2-rgb), 0.18);
-      border: 1px solid rgba(var(--accent-2-rgb), 0.42);
+      background: rgba(var(--accent-2-rgb), 0.22);
+      border: 1px solid rgba(var(--accent-2-rgb), 0.45);
       color: #e0f2fe;
-      padding: 4px 8px;
-      border-radius: 6px;
+      padding: 4px 9px;
+      border-radius: 7px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
       cursor: pointer;
@@ -570,7 +620,7 @@
 
     .otp-input {
       width: 100%;
-      height: 52px;
+      height: 54px;
       text-align: center;
       font-family: 'JetBrains Mono', monospace;
       font-size: 22px;
@@ -578,8 +628,8 @@
       letter-spacing: 0.42em;
       padding: 0 14px;
       border-radius: var(--radius-md);
-      border: 1px solid var(--border-strong);
-      background: var(--bg-input);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: var(--glass-input);
       color: var(--text-main);
       outline: none;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -587,7 +637,7 @@
 
     .otp-input:focus {
       border-color: rgba(var(--accent-rgb), 0.85);
-      box-shadow: 0 0 0 3.5px rgba(var(--accent-rgb), 0.16);
+      box-shadow: 0 0 0 3.5px rgba(var(--accent-rgb), 0.18);
     }
 
     .otp-actions {
@@ -609,13 +659,13 @@
       height: 64px;
       margin: 0 auto 18px;
       border-radius: 50%;
-      border: 2.5px solid rgba(var(--accent-rgb), 0.16);
+      border: 2.5px solid rgba(var(--accent-rgb), 0.18);
       border-top-color: var(--accent);
       border-right-color: var(--accent-2);
       display: grid;
       place-items: center;
       animation: spin 0.9s linear infinite;
-      box-shadow: 0 0 28px rgba(var(--accent-rgb), 0.24);
+      box-shadow: 0 0 28px rgba(var(--accent-rgb), 0.26);
     }
 
     .spinner-orbit svg {
@@ -629,7 +679,7 @@
       width: 100%;
       height: 6px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.08);
       overflow: hidden;
       margin-top: 18px;
     }
@@ -654,10 +704,10 @@
       margin: 0 auto 16px;
       display: grid;
       place-items: center;
-      background: rgba(var(--accent-rgb), 0.14);
-      border: 1px solid rgba(var(--accent-rgb), 0.42);
+      background: rgba(var(--accent-rgb), 0.15);
+      border: 1px solid rgba(var(--accent-rgb), 0.45);
       color: var(--accent);
-      box-shadow: 0 0 32px rgba(var(--accent-rgb), 0.24);
+      box-shadow: 0 0 32px rgba(var(--accent-rgb), 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.24);
     }
 
     .result-title {
@@ -680,52 +730,58 @@
       gap: 10px;
     }
 
-    /* Subtle Demo Triggers */
+    /* Frosted Glass Demo Triggers */
     .demo-strip {
       margin-top: 14px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      gap: 9px;
     }
 
     .demo-btn {
-      padding: 9px 10px;
-      border-radius: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
       border: 1px solid transparent;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
       transition: all 0.2s ease;
     }
 
     .demo-btn.ok {
-      background: rgba(16, 232, 154, 0.09);
-      border-color: rgba(16, 232, 154, 0.28);
-      color: #34d399;
+      background: rgba(16, 232, 154, 0.12);
+      border-color: rgba(16, 232, 154, 0.34);
+      color: #6ee7b7;
     }
 
     .demo-btn.ok:hover {
-      background: rgba(16, 232, 154, 0.18);
+      background: rgba(16, 232, 154, 0.22);
+      transform: translateY(-1px);
     }
 
     .demo-btn.fail {
-      background: rgba(244, 63, 94, 0.09);
-      border-color: rgba(244, 63, 94, 0.3);
-      color: #fb7185;
+      background: rgba(244, 63, 94, 0.12);
+      border-color: rgba(244, 63, 94, 0.36);
+      color: #fda4af;
     }
 
     .demo-btn.fail:hover {
-      background: rgba(244, 63, 94, 0.18);
+      background: rgba(244, 63, 94, 0.22);
+      transform: translateY(-1px);
     }
 
-    /* Modals */
+    /* Glass Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
       z-index: 40;
-      background: rgba(3, 6, 12, 0.82);
-      backdrop-filter: blur(10px);
+      background: rgba(3, 6, 14, 0.62);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       display: none;
       align-items: center;
       justify-content: center;
@@ -742,11 +798,13 @@
       max-width: 420px;
       max-height: calc(100dvh - 40px);
       overflow-y: auto;
-      background: #0d1523;
-      border: 1px solid rgba(var(--accent-rgb), 0.35);
-      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(20, 30, 50, 0.72), rgba(8, 14, 26, 0.76));
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid rgba(var(--accent-rgb), 0.38);
+      border-radius: 22px;
       padding: 24px;
-      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.72);
+      box-shadow: 0 30px 76px rgba(0, 0, 0, 0.72), var(--glass-specular);
     }
 
     .modal-head {
@@ -767,8 +825,8 @@
       width: 32px;
       height: 32px;
       border-radius: 9px;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06);
       color: var(--text-soft);
       cursor: pointer;
       font-size: 15px;
@@ -783,20 +841,22 @@
       outline: none;
     }
 
-    /* Toast */
+    /* Glass Toast */
     .toast {
       position: fixed;
       bottom: 20px;
       right: 22px;
       z-index: 50;
-      background: #0f172a;
-      border: 1px solid rgba(var(--accent-rgb), 0.5);
+      background: rgba(12, 20, 36, 0.68);
+      backdrop-filter: blur(22px) saturate(170%);
+      -webkit-backdrop-filter: blur(22px) saturate(170%);
+      border: 1px solid rgba(var(--accent-rgb), 0.48);
       color: var(--text-main);
       padding: 11px 16px;
-      border-radius: 12px;
+      border-radius: 13px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.16);
       transform: translateY(20px);
       opacity: 0;
       pointer-events: none;
@@ -812,28 +872,24 @@
     @media (max-width: 960px) {
       .split-shell {
         grid-template-columns: 1fr;
-        min-height: auto;
-      }
-      .visual-stage {
-        min-height: 360px;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
+        grid-template-rows: 340px auto;
       }
       .brand-mark {
-        top: 20px;
-        left: 20px;
+        position: absolute;
+        top: 18px;
+        left: 18px;
       }
       .auth-panel {
-        padding: 28px 20px 34px;
+        padding: 12px 20px 36px;
       }
     }
 
     @media (max-width: 520px) {
-      .visual-stage {
-        min-height: 300px;
+      .split-shell {
+        grid-template-rows: 270px auto;
       }
       .auth-card {
-        padding: 24px 20px;
+        padding: 26px 20px;
       }
       .demo-strip {
         grid-template-columns: 1fr;
@@ -855,28 +911,26 @@
   </style>
 </head>
 <body>
+  <div class="ambient-aurora" aria-hidden="true"></div>
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <canvas id="env-canvas" aria-label="Entorno 3D interactivo de Monitoreo de Inteligencia"></canvas>
   <div class="sun-flash-overlay" id="sun-flash-overlay" aria-hidden="true"></div>
+
+  <div class="brand-mark">
+    <div class="brand-emblem" aria-hidden="true">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L3 7v6c0 5.5 3.8 10.4 9 12 5.2-1.6 9-6.5 9-12V7l-9-5z"/>
+        <circle cx="12" cy="11.5" r="2.6"/>
+      </svg>
+    </div>
+    <span class="brand-name">Monitoreo de Inteligencia</span>
+  </div>
+
   <div class="split-shell">
-    <!-- ============================================================
-         LEFT SIDE: PURE INTERACTIVE 3D ANIMATION + BRAND TITLE ONLY
-    ============================================================ -->
-    <aside class="visual-stage" id="visual-stage" aria-label="Animación 3D interactiva de Monitoreo de Inteligencia">
-      <canvas id="core-canvas"></canvas>
+    <!-- LEFT: OPEN SPACE OVER INTERACTIVE 3D CORE -->
+    <div class="visual-stage" aria-hidden="true"></div>
 
-      <div class="brand-mark">
-        <div class="brand-emblem" aria-hidden="true">
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2L3 7v6c0 5.5 3.8 10.4 9 12 5.2-1.6 9-6.5 9-12V7l-9-5z"/>
-            <circle cx="12" cy="11.5" r="2.6"/>
-          </svg>
-        </div>
-        <span class="brand-name">Monitoreo de Inteligencia</span>
-      </div>
-    </aside>
-
-    <!-- ============================================================
-         RIGHT SIDE: CLEAN MINIMALIST LOGIN
-    ============================================================ -->
+    <!-- RIGHT: TRANSPARENT FROSTED GLASS LOGIN -->
     <main class="auth-panel">
       <section class="auth-main" aria-label="Inicio de sesión">
         <div class="auth-card" id="auth-card">
@@ -1067,7 +1121,7 @@
           </div>
         </div>
 
-        <!-- Compact Demo Triggers -->
+        <!-- Frosted Glass Demo Triggers -->
         <div class="demo-strip" aria-label="Pruebas rápidas en modo demo">
           <button type="button" class="demo-btn ok" id="btn-demo-ok">✓ Demo acceso</button>
           <button type="button" class="demo-btn fail" id="btn-demo-fail">✕ Demo error</button>
@@ -1184,7 +1238,31 @@
       let toastTimer = null;
 
       // ==========================================================
-      // 3. UI HELPERS
+      // 3. INTERACTIVE GLASS CARD TILT & SPECULAR GLARE
+      // ==========================================================
+      const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let prefersReducedMotion = reducedMotionQuery.matches;
+
+      authCard.addEventListener('pointermove', (e) => {
+        if (prefersReducedMotion) return;
+        const rect = authCard.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const rx = ((y / rect.height) - 0.5) * -5.5;
+        const ry = ((x / rect.width) - 0.5) * 5.5;
+        authCard.style.setProperty('--mx', `${x}px`);
+        authCard.style.setProperty('--my', `${y}px`);
+        authCard.style.setProperty('--glare-opacity', '1');
+        authCard.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+      });
+
+      authCard.addEventListener('pointerleave', () => {
+        authCard.style.setProperty('--glare-opacity', '0');
+        authCard.style.transform = '';
+      });
+
+      // ==========================================================
+      // 4. UI HELPERS & MODAL MANAGER
       // ==========================================================
       function showToast(message) {
         toastEl.textContent = message;
@@ -1223,9 +1301,6 @@
         if (savedUser) inputUser.value = savedUser;
       } catch (e) {}
 
-      // ==========================================================
-      // 4. ACCESSIBLE MODAL (ESC + FOCUS TRAP + RESTORE)
-      // ==========================================================
       let activeModal = null;
       let lastTriggerEl = null;
 
@@ -1483,7 +1558,7 @@
       }
 
       // ==========================================================
-      // 6. FORM LISTENERS
+      // 6. FORM LISTENERS (TYPING SENDS ENERGY BEAMS TO 3D CORE)
       // ==========================================================
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -1492,6 +1567,7 @@
 
       const onType = () => {
         state.typingBoost = Math.min(1, state.typingBoost + 0.36);
+        spawnTypingPulse();
       };
       inputUser.addEventListener('input', () => { setFieldError(inputUser, errUser, ''); onType(); });
       inputPass.addEventListener('input', () => { setFieldError(inputPass, errPass, ''); onType(); });
@@ -1591,23 +1667,43 @@
       });
 
       // ==========================================================
-      // 7. NEXT-LEVEL INTERACTIVE 3D ANIMATION ENGINE
-      //    (Drag inertia, hover magnetic arcs, click bursts, wheel zoom,
-      //     inner counter-rotating core, segmented holographic rings)
+      // 7. FULLSCREEN INTERACTIVE 3D + CONSTELLATION ENVIRONMENT
       // ==========================================================
-      const stageEl = document.getElementById('visual-stage');
-      const canvas = document.getElementById('core-canvas');
+      const canvas = document.getElementById('env-canvas');
       const ctx = canvas.getContext('2d');
 
-      const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      let prefersReducedMotion = reducedMotionQuery.matches;
       let isPageVisible = !document.hidden;
-      let isStageInView = true;
       let rafId = null;
-
       let cw = 0;
       let ch = 0;
       let dpr = 1;
+
+      // Full-viewport interactive constellation field (flows behind the glass login too!)
+      const fieldParticles = Array.from({ length: 68 }, () => ({
+        x: Math.random(),
+        y: Math.random(),
+        vx: (Math.random() - 0.5) * 0.00032,
+        vy: (Math.random() - 0.5) * 0.00032,
+        r: 1.1 + Math.random() * 1.9,
+        alpha: 0.22 + Math.random() * 0.42
+      }));
+
+      // Energy pulses traveling from the login card to the 3D core on typing
+      const typingPulses = [];
+      function spawnTypingPulse() {
+        if (prefersReducedMotion || !cw || !ch) return;
+        const rect = authCard.getBoundingClientRect();
+        const startX = rect.left + 8;
+        const startY = rect.top + rect.height * (0.3 + Math.random() * 0.4);
+        typingPulses.push({
+          sx: startX,
+          sy: startY,
+          t: 0,
+          speed: 0.032 + Math.random() * 0.016,
+          arc: (Math.random() - 0.5) * 90
+        });
+        if (typingPulses.length > 18) typingPulses.shift();
+      }
 
       // Outer Fibonacci Geodesic Sphere
       const OUTER_COUNT = 78;
@@ -1632,13 +1728,11 @@
           const dx = outerNodes[i].x - outerNodes[j].x;
           const dy = outerNodes[i].y - outerNodes[j].y;
           const dz = outerNodes[i].z - outerNodes[j].z;
-          if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 0.52) {
-            outerEdges.push([i, j]);
-          }
+          if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 0.52) outerEdges.push([i, j]);
         }
       }
 
-      // Inner Counter-Rotating Geodesic Core (Icosahedron-like lattice)
+      // Inner Counter-Rotating Geodesic Core
       const INNER_COUNT = 22;
       const innerNodes = [];
       for (let i = 0; i < INNER_COUNT; i++) {
@@ -1653,13 +1747,10 @@
           const dx = innerNodes[i].x - innerNodes[j].x;
           const dy = innerNodes[i].y - innerNodes[j].y;
           const dz = innerNodes[i].z - innerNodes[j].z;
-          if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 0.96) {
-            innerEdges.push([i, j]);
-          }
+          if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 0.96) innerEdges.push([i, j]);
         }
       }
 
-      // Data packets flowing along outer edges
       const packets = Array.from({ length: 22 }, () => ({
         edgeIdx: Math.floor(Math.random() * outerEdges.length),
         t: Math.random(),
@@ -1676,10 +1767,9 @@
             boosted: true
           });
         }
-        if (packets.length > 52) packets.splice(22, packets.length - 52);
+        if (packets.length > 56) packets.splice(22, packets.length - 56);
       }
 
-      // 4 Segmented Holographic Orbital Rings with satellite trails
       const orbits = [
         { tiltX: 0.58, tiltZ: 0.24, radiusMul: 1.24, angle: 0.4, speed: 0.0085, dash: [10, 7], trail: [] },
         { tiltX: -0.46, tiltZ: -0.55, radiusMul: 1.44, angle: 2.1, speed: -0.0068, dash: [22, 10], trail: [] },
@@ -1687,33 +1777,8 @@
         { tiltX: -0.82, tiltZ: 0.35, radiusMul: 1.62, angle: 5.2, speed: -0.0046, dash: [34, 14], trail: [] }
       ];
 
-      // Ambient spatial particles
-      const dust = Array.from({ length: 44 }, () => ({
-        x: Math.random(),
-        y: Math.random(),
-        r: 0.8 + Math.random() * 1.6,
-        vy: -0.00016 - Math.random() * 0.00024,
-        alpha: 0.14 + Math.random() * 0.36
-      }));
-
-      // Interactive pointer, drag inertia, zoom, and click ripples
-      const pointer = {
-        active: false,
-        px: 0,
-        py: 0,
-        nx: 0,
-        ny: 0
-      };
-      const drag = {
-        down: false,
-        moved: false,
-        startX: 0,
-        startY: 0,
-        lastX: 0,
-        lastY: 0,
-        velX: 0,
-        velY: 0
-      };
+      const pointer = { active: false, px: 0, py: 0, nx: 0, ny: 0 };
+      const drag = { down: false, moved: false, startX: 0, startY: 0, lastX: 0, lastY: 0, velX: 0, velY: 0 };
       let zoom = 1;
       let targetZoom = 1;
       const clickRipples = [];
@@ -1741,32 +1806,18 @@
         }
       }
 
-      stageEl.addEventListener('pointerdown', (e) => {
-        if (e.button !== 0 && e.pointerType === 'mouse') return;
-        drag.down = true;
-        drag.moved = false;
-        drag.startX = drag.lastX = e.clientX;
-        drag.startY = drag.lastY = e.clientY;
-        drag.velX = 0;
-        drag.velY = 0;
-        stageEl.classList.add('dragging');
-        if (stageEl.setPointerCapture) stageEl.setPointerCapture(e.pointerId);
-      });
-
-      stageEl.addEventListener('pointermove', (e) => {
-        const rect = stageEl.getBoundingClientRect();
+      // Global pointer tracking so the background reacts even around the glass login card
+      window.addEventListener('pointermove', (e) => {
         pointer.active = true;
-        pointer.px = e.clientX - rect.left;
-        pointer.py = e.clientY - rect.top;
-        pointer.nx = (pointer.px / rect.width - 0.5) * 2;
-        pointer.ny = (pointer.py / rect.height - 0.5) * 2;
+        pointer.px = e.clientX;
+        pointer.py = e.clientY;
+        pointer.nx = (e.clientX / Math.max(1, cw) - 0.5) * 2;
+        pointer.ny = (e.clientY / Math.max(1, ch) - 0.5) * 2;
 
         if (drag.down) {
           const dx = e.clientX - drag.lastX;
           const dy = e.clientY - drag.lastY;
-          if (Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) > 6) {
-            drag.moved = true;
-          }
+          if (Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) > 6) drag.moved = true;
           rotY += dx * 0.0075;
           rotX = Math.max(-1.25, Math.min(1.25, rotX + dy * 0.0065));
           drag.velY = dx * 0.0042;
@@ -1777,50 +1828,51 @@
         }
       });
 
+      window.addEventListener('pointerleave', () => { pointer.active = false; });
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+        drag.down = true;
+        drag.moved = false;
+        drag.startX = drag.lastX = e.clientX;
+        drag.startY = drag.lastY = e.clientY;
+        drag.velX = 0;
+        drag.velY = 0;
+        canvas.classList.add('dragging');
+        if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+      });
+
       function endDrag(e) {
         if (!drag.down) return;
         drag.down = false;
-        stageEl.classList.remove('dragging');
+        canvas.classList.remove('dragging');
         if (!drag.moved) {
-          // Clean click / tap -> emit shockwave + ripple + burst packets
-          const rect = stageEl.getBoundingClientRect();
-          clickRipples.push({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-            r: 8,
-            alpha: 0.9
-          });
+          clickRipples.push({ x: e.clientX, y: e.clientY, r: 8, alpha: 0.92 });
           state.shockwave = 1;
-          spawnBurstPackets(10);
+          spawnBurstPackets(12);
           requestStaticRedraw();
         }
       }
 
-      stageEl.addEventListener('pointerup', endDrag);
-      stageEl.addEventListener('pointercancel', endDrag);
-      stageEl.addEventListener('pointerleave', () => {
-        pointer.active = false;
-      });
+      canvas.addEventListener('pointerup', endDrag);
+      canvas.addEventListener('pointercancel', endDrag);
 
-      // Mouse wheel smooth zoom
-      stageEl.addEventListener('wheel', (e) => {
+      canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
         targetZoom = Math.max(0.76, Math.min(1.38, targetZoom - e.deltaY * 0.0008));
         requestStaticRedraw();
       }, { passive: false });
 
-      // Double-click toggles zoom / resets camera cleanly
-      stageEl.addEventListener('dblclick', () => {
+      canvas.addEventListener('dblclick', () => {
         targetZoom = Math.abs(targetZoom - 1) < 0.08 ? 1.24 : 1;
         state.shockwave = Math.max(state.shockwave, 0.7);
         requestStaticRedraw();
       });
 
       function resizeCanvas() {
-        const rect = stageEl.getBoundingClientRect();
-        const nextW = Math.max(1, Math.floor(rect.width));
-        const nextH = Math.max(1, Math.floor(rect.height));
-        const maxDpr = window.innerWidth < 640 ? 1.5 : 2;
+        const nextW = Math.max(1, window.innerWidth);
+        const nextH = Math.max(1, window.innerHeight);
+        const maxDpr = nextW < 640 ? 1.5 : 2;
         const nextDpr = Math.min(window.devicePixelRatio || 1, maxDpr);
         if (nextW === cw && nextH === ch && nextDpr === dpr) return;
         cw = nextW;
@@ -1832,21 +1884,11 @@
         requestStaticRedraw();
       }
 
-      if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resizeCanvas).observe(stageEl);
       window.addEventListener('resize', resizeCanvas);
-
-      if (typeof IntersectionObserver !== 'undefined') {
-        new IntersectionObserver((entries) => {
-          isStageInView = entries[0].isIntersecting;
-          syncAnimationLoop();
-        }, { threshold: 0.05 }).observe(stageEl);
-      }
-
       document.addEventListener('visibilitychange', () => {
         isPageVisible = !document.hidden;
         syncAnimationLoop();
       });
-
       if (reducedMotionQuery.addEventListener) {
         reducedMotionQuery.addEventListener('change', (e) => {
           prefersReducedMotion = e.matches;
@@ -1900,20 +1942,19 @@
           if (i === 0) ctx.moveTo(p.x, p.y);
           else ctx.lineTo(p.x, p.y);
         }
-        ctx.strokeStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.22)`;
+        ctx.strokeStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.24)`;
         ctx.lineWidth = 1.1;
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.restore();
 
-        // Satellite + fading trail
         const sat = projectOrbitPoint(cx, cy, radius, orb.angle, tx, tz);
         if (advance) {
           orb.trail.unshift({ x: sat.x, y: sat.y });
           if (orb.trail.length > 10) orb.trail.pop();
         }
         for (let i = 1; i < orb.trail.length; i++) {
-          const alpha = (1 - i / orb.trail.length) * 0.45;
+          const alpha = (1 - i / orb.trail.length) * 0.48;
           ctx.beginPath();
           ctx.moveTo(orb.trail[i - 1].x, orb.trail[i - 1].y);
           ctx.lineTo(orb.trail[i].x, orb.trail[i].y);
@@ -1923,7 +1964,7 @@
         }
 
         ctx.beginPath();
-        ctx.arc(sat.x, sat.y, 3.2 * sat.scale, 0, Math.PI * 2);
+        ctx.arc(sat.x, sat.y, 3.3 * sat.scale, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.96)`;
         ctx.shadowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.85)`;
         ctx.shadowBlur = 10;
@@ -1954,45 +1995,112 @@
         }
 
         const { primary: rgb, secondary: secRgb } = getPalette();
-        const cx = cw * 0.5;
-        const cy = ch * 0.5;
+        const isDesktop = cw > 960;
+        // Core lives gracefully on the LEFT side on desktop, top on mobile
+        const cx = isDesktop ? cw * 0.305 : cw * 0.5;
+        const cy = isDesktop ? ch * 0.5 : Math.min(ch * 0.22, 175);
         const errorShrink = 1 - state.errorPulse * 0.09;
         const sunBloom = 1 + Math.sin(state.sunFlash * Math.PI * 0.5) * 0.14;
-        const baseRadius = Math.min(cw, ch) * 0.275 * zoom * errorShrink * sunBloom;
+        const baseRadius = (isDesktop ? Math.min(cw * 0.55, ch) * 0.27 : Math.min(cw, 360) * 0.25) * zoom * errorShrink * sunBloom;
 
-        // 1. Ambient spatial particles (gently attracted to pointer)
-        dust.forEach((d) => {
+        // 0. Interactive Cursor Environment Halo
+        if (pointer.active) {
+          const halo = ctx.createRadialGradient(pointer.px, pointer.py, 4, pointer.px, pointer.py, 210);
+          halo.addColorStop(0, `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.14)`);
+          halo.addColorStop(0.5, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.05)`);
+          halo.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = halo;
+          ctx.beginPath();
+          ctx.arc(pointer.px, pointer.py, 210, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 1. Fullscreen Interactive Constellation Network (flows behind glass login too!)
+        const fPts = fieldParticles.map((p) => {
           if (advance) {
-            d.y += d.vy * (state.mode === 'loading' ? 2.5 : 1);
-            if (d.y < -0.02) { d.y = 1.02; d.x = Math.random(); }
+            p.x += p.vx * (state.mode === 'loading' ? 2.4 : 1);
+            p.y += p.vy * (state.mode === 'loading' ? 2.4 : 1);
+            if (p.x < 0) p.x = 1; else if (p.x > 1) p.x = 0;
+            if (p.y < 0) p.y = 1; else if (p.y > 1) p.y = 0;
           }
-          let dx = d.x * cw;
-          let dy = d.y * ch;
+          let x = p.x * cw;
+          let y = p.y * ch;
           if (pointer.active) {
-            const dist = Math.hypot(pointer.px - dx, pointer.py - dy);
-            if (dist < 150 && dist > 1) {
-              const pull = (1 - dist / 150) * 10;
-              dx += ((pointer.px - dx) / dist) * pull;
-              dy += ((pointer.py - dy) / dist) * pull;
+            const dist = Math.hypot(pointer.px - x, pointer.py - y);
+            if (dist < 170 && dist > 1) {
+              const pull = (1 - dist / 170) * 16;
+              x += ((pointer.px - x) / dist) * pull;
+              y += ((pointer.py - y) / dist) * pull;
+            }
+          }
+          return { x, y, r: p.r, alpha: p.alpha };
+        });
+
+        for (let i = 0; i < fPts.length; i++) {
+          const a = fPts[i];
+          for (let j = i + 1; j < fPts.length; j++) {
+            const b = fPts[j];
+            const d = Math.hypot(a.x - b.x, a.y - b.y);
+            if (d < 125) {
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.strokeStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, ${(1 - d / 125) * 0.14})`;
+              ctx.lineWidth = 0.9;
+              ctx.stroke();
+            }
+          }
+          if (pointer.active) {
+            const dp = Math.hypot(pointer.px - a.x, pointer.py - a.y);
+            if (dp < 155) {
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(pointer.px, pointer.py);
+              ctx.strokeStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${(1 - dp / 155) * 0.34})`;
+              ctx.lineWidth = 1;
+              ctx.stroke();
             }
           }
           ctx.beginPath();
-          ctx.arc(dx, dy, d.r, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, ${d.alpha * 0.45})`;
+          ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, ${a.alpha * 0.6})`;
           ctx.fill();
-        });
+        }
 
-        // 2. Soft core radial aura + Solar God-Rays on Success
+        // Typing energy pulses flying from login card into the 3D core
+        for (let i = typingPulses.length - 1; i >= 0; i--) {
+          const tp = typingPulses[i];
+          if (advance) tp.t += tp.speed;
+          if (tp.t >= 1) {
+            typingPulses.splice(i, 1);
+            continue;
+          }
+          const u = 1 - tp.t;
+          const mx = (tp.sx + cx) * 0.5;
+          const my = (tp.sy + cy) * 0.5 + tp.arc;
+          const px = u * u * tp.sx + 2 * u * tp.t * mx + tp.t * tp.t * cx;
+          const py = u * u * tp.sy + 2 * u * tp.t * my + tp.t * tp.t * cy;
+
+          ctx.beginPath();
+          ctx.arc(px, py, 2.8, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${Math.sin(tp.t * Math.PI) * 0.95})`;
+          ctx.shadowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.9)`;
+          ctx.shadowBlur = 12;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+
+        // 2. Core Aura + Golden Solar God-Rays on Success
         const auraScale = state.mode === 'success' ? 2.45 + state.sunFlash * 0.9 : 1.95;
         const aura = ctx.createRadialGradient(cx, cy, baseRadius * 0.06, cx, cy, baseRadius * auraScale);
         if (state.mode === 'success') {
-          aura.addColorStop(0, `rgba(255, 250, 224, ${0.42 + state.sunFlash * 0.52})`);
-          aura.addColorStop(0.28, `rgba(245, 197, 66, ${0.26 + state.sunFlash * 0.34})`);
-          aura.addColorStop(0.62, `rgba(217, 119, 6, ${0.09 + state.sunFlash * 0.14})`);
+          aura.addColorStop(0, `rgba(255, 250, 224, ${0.44 + state.sunFlash * 0.52})`);
+          aura.addColorStop(0.28, `rgba(245, 197, 66, ${0.28 + state.sunFlash * 0.34})`);
+          aura.addColorStop(0.62, `rgba(217, 119, 6, ${0.1 + state.sunFlash * 0.14})`);
           aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
         } else {
-          aura.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${0.2 + state.typingBoost * 0.1})`);
-          aura.addColorStop(0.5, `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.06)`);
+          aura.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${0.22 + state.typingBoost * 0.12})`);
+          aura.addColorStop(0.5, `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.07)`);
           aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
         }
         ctx.fillStyle = aura;
@@ -2000,11 +2108,10 @@
         ctx.arc(cx, cy, baseRadius * auraScale, 0, Math.PI * 2);
         ctx.fill();
 
-        // Volumetric rotating solar sunbeams when logged in
         if (state.mode === 'success' || state.sunFlash > 0.01) {
-          const rayIntensity = state.mode === 'success' ? 0.22 + state.sunFlash * 0.65 : state.sunFlash * 0.65;
+          const rayIntensity = state.mode === 'success' ? 0.24 + state.sunFlash * 0.65 : state.sunFlash * 0.65;
           const rayCount = 18;
-          const maxRayLen = Math.max(cw, ch) * (0.62 + state.sunFlash * 0.35);
+          const maxRayLen = Math.max(cw, ch) * (0.56 + state.sunFlash * 0.32);
           ctx.save();
           ctx.translate(cx, cy);
           ctx.rotate(time * 0.14);
@@ -2025,9 +2132,8 @@
           }
           ctx.restore();
 
-          // Anamorphic horizontal solar lens flare streak during entry flash
           if (state.sunFlash > 0.02) {
-            const flareW = cw * (0.55 + state.sunFlash * 0.55);
+            const flareW = cw * (0.48 + state.sunFlash * 0.48);
             const flareH = Math.max(3, baseRadius * 0.09 * state.sunFlash);
             const hGrad = ctx.createLinearGradient(cx - flareW, cy, cx + flareW, cy);
             hGrad.addColorStop(0, 'rgba(255, 245, 190, 0)');
@@ -2042,29 +2148,22 @@
           }
         }
 
-        // Staggered triple golden solar shockwaves
         for (let i = solarWaves.length - 1; i >= 0; i--) {
           const w = solarWaves[i];
           if (advance) w.progress += w.speed;
-          if (w.progress >= 1) {
-            solarWaves.splice(i, 1);
-            continue;
-          }
+          if (w.progress >= 1) { solarWaves.splice(i, 1); continue; }
           if (w.progress > 0) {
-            const r = baseRadius * (0.45 + w.progress * 2.55);
-            const alpha = (1 - w.progress) * 0.72;
             ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(255, 236, 153, ${alpha})`;
+            ctx.arc(cx, cy, baseRadius * (0.45 + w.progress * 2.65), 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 236, 153, ${(1 - w.progress) * 0.72})`;
             ctx.lineWidth = 2.6 * (1 - w.progress * 0.55);
             ctx.stroke();
           }
         }
 
-        // Click ripples
         for (let i = clickRipples.length - 1; i >= 0; i--) {
           const rp = clickRipples[i];
-          if (advance) { rp.r += 3.6; rp.alpha -= 0.025; }
+          if (advance) { rp.r += 3.8; rp.alpha -= 0.025; }
           if (rp.alpha <= 0) { clickRipples.splice(i, 1); continue; }
           ctx.beginPath();
           ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
@@ -2073,7 +2172,6 @@
           ctx.stroke();
         }
 
-        // Shockwave ring
         if (state.shockwave > 0) {
           const p = 1 - state.shockwave;
           ctx.beginPath();
@@ -2083,7 +2181,7 @@
           ctx.stroke();
         }
 
-        // 3. Holographic orbital rings
+        // 3. Holographic Orbital Rings
         const tiltOffX = pointer.active ? pointer.ny * 0.14 : 0;
         const tiltOffZ = pointer.active ? pointer.nx * 0.14 : 0;
         orbits.forEach((orb) => {
@@ -2094,7 +2192,7 @@
           drawOrbitRing(cx, cy, baseRadius * orb.radiusMul, orb, tiltOffX, tiltOffZ, rgb, secRgb, advance);
         });
 
-        // 4. Inner counter-rotating geodesic core
+        // 4. Inner Counter-Rotating Geodesic Core
         const innerRadius = baseRadius * 0.48;
         const innerProj = innerNodes.map((n) => {
           const p = rotate3D(n.x, n.y, n.z, -rotX * 0.7, innerRotY);
@@ -2105,7 +2203,7 @@
         for (let i = 0; i < innerEdges.length; i++) {
           const a = innerProj[innerEdges[i][0]];
           const b = innerProj[innerEdges[i][1]];
-          const alpha = Math.max(0.08, Math.min(0.42, (1 - (a.z + b.z) * 0.5) * 0.24));
+          const alpha = Math.max(0.08, Math.min(0.44, (1 - (a.z + b.z) * 0.5) * 0.25));
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -2114,18 +2212,18 @@
           ctx.stroke();
         }
 
-        // Central luminous plasma nucleus (white-hot sun core on success)
+        // Central Luminous Nucleus
         const corePulse = advance ? 1 + Math.sin(time * 3.2) * 0.12 + state.typingBoost * 0.14 + state.sunFlash * 0.45 : 1;
         const nucleusR = baseRadius * (state.mode === 'success' ? 0.42 : 0.34) * corePulse;
         const nucleus = ctx.createRadialGradient(cx, cy, 2, cx, cy, nucleusR);
         if (state.mode === 'success') {
-          nucleus.addColorStop(0, `rgba(255, 254, 240, ${0.95})`);
-          nucleus.addColorStop(0.32, `rgba(253, 224, 120, ${0.82})`);
-          nucleus.addColorStop(0.65, `rgba(245, 197, 66, ${0.32})`);
+          nucleus.addColorStop(0, 'rgba(255, 254, 240, 0.95)');
+          nucleus.addColorStop(0.32, 'rgba(253, 224, 120, 0.82)');
+          nucleus.addColorStop(0.65, 'rgba(245, 197, 66, 0.32)');
           nucleus.addColorStop(1, 'rgba(0, 0, 0, 0)');
         } else {
-          nucleus.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.75)`);
-          nucleus.addColorStop(0.45, `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.24)`);
+          nucleus.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.78)`);
+          nucleus.addColorStop(0.45, `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.26)`);
           nucleus.addColorStop(1, 'rgba(0, 0, 0, 0)');
         }
         ctx.fillStyle = nucleus;
@@ -2141,12 +2239,11 @@
           return { x: cx + p.x * baseRadius * scale, y: cy + p.y * baseRadius * scale, z: p.z, scale, hub: n.hub };
         });
 
-        // Outer edges (dimmer on back face for crisp 3D depth)
         for (let i = 0; i < outerEdges.length; i++) {
           const a = outerProj[outerEdges[i][0]];
           const b = outerProj[outerEdges[i][1]];
           const avgZ = (a.z + b.z) * 0.5;
-          const alpha = avgZ > 0.25 ? 0.05 : Math.max(0.07, Math.min(0.46, (1 - avgZ) * 0.25));
+          const alpha = avgZ > 0.25 ? 0.05 : Math.max(0.08, Math.min(0.48, (1 - avgZ) * 0.26));
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -2155,7 +2252,6 @@
           ctx.stroke();
         }
 
-        // Loading scan sweep across sphere
         if (state.mode === 'loading') {
           const scanY = cy + Math.sin(time * 4.5) * baseRadius * 0.92;
           const halfW = Math.sqrt(Math.max(0, baseRadius * baseRadius - (scanY - cy) * (scanY - cy)));
@@ -2171,17 +2267,13 @@
           ctx.stroke();
         }
 
-        // Data packets traveling along edges
         for (let i = packets.length - 1; i >= 0; i--) {
           const pkt = packets[i];
           if (advance) {
             const mul = state.mode === 'loading' ? 2.6 : 1 + state.typingBoost * 1.4;
             pkt.t += pkt.speed * mul;
             if (pkt.t >= 1) {
-              if (pkt.boosted) {
-                packets.splice(i, 1);
-                continue;
-              }
+              if (pkt.boosted) { packets.splice(i, 1); continue; }
               pkt.t = 0;
               pkt.edgeIdx = Math.floor(Math.random() * outerEdges.length);
             }
@@ -2189,10 +2281,8 @@
           const a = outerProj[outerEdges[pkt.edgeIdx][0]];
           const b = outerProj[outerEdges[pkt.edgeIdx][1]];
           if ((a.z + b.z) * 0.5 < 0.45) {
-            const px = a.x + (b.x - a.x) * pkt.t;
-            const py = a.y + (b.y - a.y) * pkt.t;
             ctx.beginPath();
-            ctx.arc(px, py, pkt.boosted ? 2.8 : 2.1, 0, Math.PI * 2);
+            ctx.arc(a.x + (b.x - a.x) * pkt.t, a.y + (b.y - a.y) * pkt.t, pkt.boosted ? 2.8 : 2.1, 0, Math.PI * 2);
             ctx.fillStyle = pkt.boosted
               ? `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.98)`
               : `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, 0.92)`;
@@ -2200,27 +2290,25 @@
           }
         }
 
-        // 6. Interactive magnetic energy beams from closest front nodes to cursor
+        // Interactive Magnetic Beams from front core nodes to pointer
         if (pointer.active && !drag.down) {
           let beamCount = 0;
           for (let i = 0; i < outerProj.length && beamCount < 4; i++) {
             const n = outerProj[i];
             if (n.z > 0.15) continue;
             const dist = Math.hypot(pointer.px - n.x, pointer.py - n.y);
-            if (dist < 135) {
-              const strength = 1 - dist / 135;
+            if (dist < 155) {
               ctx.beginPath();
               ctx.moveTo(n.x, n.y);
               ctx.lineTo(pointer.px, pointer.py);
-              ctx.strokeStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, ${strength * 0.55})`;
-              ctx.lineWidth = 1.2;
+              ctx.strokeStyle = `rgba(${secRgb[0]}, ${secRgb[1]}, ${secRgb[2]}, ${(1 - dist / 155) * 0.58})`;
+              ctx.lineWidth = 1.25;
               ctx.stroke();
               beamCount++;
             }
           }
         }
 
-        // Outer nodes sorted back-to-front
         outerProj.slice().sort((a, b) => b.z - a.z).forEach((n) => {
           const front = Math.max(0.16, Math.min(1, (1 - n.z) * 0.56));
           ctx.beginPath();
@@ -2231,7 +2319,7 @@
           ctx.fill();
         });
 
-        // Golden solar embers / sparks erupting outward on entry
+        // Golden solar sparks
         for (let i = solarSparks.length - 1; i >= 0; i--) {
           const sp = solarSparks[i];
           if (advance) {
@@ -2241,10 +2329,7 @@
             sp.vy *= 0.972;
             sp.life -= sp.decay;
           }
-          if (sp.life <= 0) {
-            solarSparks.splice(i, 1);
-            continue;
-          }
+          if (sp.life <= 0) { solarSparks.splice(i, 1); continue; }
           const twinkle = 0.65 + Math.sin(time * 16 + sp.twinkle) * 0.35;
           ctx.beginPath();
           ctx.arc(cx + sp.x, cy + sp.y, sp.size * sp.life, 0, Math.PI * 2);
@@ -2263,7 +2348,7 @@
       }
 
       function syncAnimationLoop() {
-        const shouldRun = isPageVisible && isStageInView && !prefersReducedMotion;
+        const shouldRun = isPageVisible && !prefersReducedMotion;
         if (shouldRun && rafId === null) {
           rafId = requestAnimationFrame(tick);
         } else if (!shouldRun && rafId !== null) {
